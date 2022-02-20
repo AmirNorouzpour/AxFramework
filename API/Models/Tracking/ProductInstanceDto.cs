@@ -32,7 +32,6 @@ namespace API.Models.Tracking
                 dest => dest.UserName,
                 config => config.MapFrom(src => $"{src.Personnel.User.FirstName} {src.Personnel.User.LastName}")
             );
-
         }
     }
 }

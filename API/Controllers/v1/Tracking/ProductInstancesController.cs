@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Common;
 using Common.Exception;
 using Common.Utilities;
 using Data.Repositories;
+using Entities.Framework;
 using Entities.Framework.AxCharts;
 using Entities.Framework.Reports;
 using Entities.Tracking;
@@ -46,11 +48,23 @@ namespace API.Controllers.v1.Tracking
 
         [HttpGet]
         [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.ProductInstanceList)]
-        public virtual ApiResult<IQueryable<ProductInstanceDto>> Get([FromQuery] DataRequest request)
+        public virtual ApiResult<IQueryable<ProductInstanceDto>> Get([FromQuery] DataRequest request, long? code = null, string userIds = null, DateTime? date = null)
         {
-            var predicate = request.GetFilter<ProductInstance>();
-            var data = _repository.GetAll(predicate).OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<ProductInstanceDto>();
-            Response.Headers.Add("X-Pagination", _repository.Count(predicate).ToString());
+            //var predicate = request.GetFilter<ProductInstance>();
+            var data0 = _repository.GetAll();
+            if (code.HasValue)
+                data0 = data0.Where(x => x.Code == code);
+
+            if (userIds != null)
+            {
+                var userIdsArray = userIds.Split(',').Select(int.Parse);
+                data0 = data0.Where(x => userIdsArray.Contains(x.Personnel.UserId));
+            }
+            if (date.HasValue)
+                data0 = data0.Where(x => x.InsertDateTime.Date == date.Value.Date);
+
+            var data = data0.OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<ProductInstanceDto>();
+            Response.Headers.Add("X-Pagination", data0.Count().ToString());
             return Ok(data);
         }
 
