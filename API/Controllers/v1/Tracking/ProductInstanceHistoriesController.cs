@@ -44,7 +44,7 @@ namespace API.Controllers.v1.Tracking
             if (op.HasValue)
                 data0 = data0.Where(x => x.OpId == op);
 
-            var data = data0.OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<ProductInstanceHistoryDto>();
+            var data = data0.OrderBy(request.Sort, request.SortType).OrderByDescending(x => x.Id).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<ProductInstanceHistoryDto>();
             Response.Headers.Add("X-Pagination", data0.Count().ToString());
             return Ok(data);
         }
