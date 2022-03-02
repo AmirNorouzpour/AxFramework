@@ -15,4 +15,10 @@
     <ProjectReference Include="..\ExpressionBuilder\ExpressionBuilder.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="EPPlus">
+      <HintPath>..\..\AxTarder\AxTrader\bin\x64\Debug\EPPlus.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using API.Models.Tracking;
 using AutoMapper.QueryableExtensions;
 using Common;
@@ -48,6 +49,42 @@ namespace API.Controllers.v1.Tracking
             Response.Headers.Add("X-Pagination", data0.Count().ToString());
             return Ok(data);
         }
+
+        [HttpGet("ExportToXlsx")]
+        [AxAuthorize(StateType = StateType.Ignore, AxOp = AxOp.ProductInstanceHistoryList)]
+        public Task<FileContentResult> ExportToXlsx(long? code = null, long? op = null, string userIds = null, DateTime? date = null)
+        {
+            var data0 = _repository.GetAll();
+            if (code.HasValue)
+                data0 = data0.Where(x => x.ProductInstance.Code == code);
+
+            if (userIds != null)
+            {
+                var userIdsArray = userIds.Split(',').Select(int.Parse);
+                data0 = data0.Where(x => userIdsArray.Contains(x.ProductInstance.Personnel.UserId));
+            }
+
+            if (date.HasValue)
+                data0 = data0.Where(x => x.InsertDateTime.Date == date.Value.Date);
+
+            if (op.HasValue)
+                data0 = data0.Where(x => x.OpId == op);
+
+            var data = data0.OrderByDescending(x => x.Id).ProjectTo<ProductInstanceHistoryDto>();
+
+            var name = DateTime.Now.ToPerDateTimeString();
+            var fileName = name + ".xlsx";
+            var mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            var fileBytes = GeneralUtils.ExportToExcel(data.ToList());
+
+            return Task.FromResult(new FileContentResult(fileBytes.ToArray(), mimeType)
+            {
+                FileDownloadName = fileName
+            });
+
+        }
+
+
 
 
     }
