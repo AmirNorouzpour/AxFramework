@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Common.Utilities;
 using Entities.Framework;
-using Entities.Tracking;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -27,27 +26,6 @@ namespace Data
             modelBuilder.RegisterAllEntities<IEntity>(entitiesAssembly);
             modelBuilder.AddSequentialGuidForIdConvention();
             modelBuilder.AddPluralizingTableNameConvention();
-
-            modelBuilder.Entity<ProductInstance>()
-                .HasOne(c => c.Personnel)
-                .WithMany()
-                .OnDelete(DeleteBehavior.NoAction);
-
-            
-            modelBuilder.Entity<ProductInstance>()
-                .HasOne(c => c.ProductLine)
-                .WithMany()
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<ProductInstanceHistory>()
-                .HasOne(c => c.Personnel)
-                .WithMany()
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<ProductInstanceHistory>()
-                .HasOne(c => c.OperationStation)
-                .WithMany()
-                .OnDelete(DeleteBehavior.NoAction);
         }
 
         public int SaveChanges(AuditType type)

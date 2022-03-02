@@ -10,7 +10,6 @@ using AutoMapper.QueryableExtensions;
 using Common.Utilities;
 using Entities.Framework;
 using Entities.Framework.AxCharts.Common;
-using Entities.Tracking;
 using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
 using WebFramework.Filters;
@@ -28,13 +27,10 @@ namespace API.Controllers.v1.Chart
         private readonly IBaseRepository<LoginLog> _loginlogRepository;
         private readonly IBaseRepository<LineChart> _lineRepository;
         private readonly IBaseRepository<HardwareDataHistory> _hardRepository;
-        private readonly IBaseRepository<ProductInstanceHistory> _productInstanceRepository;
-        private readonly IBaseRepository<OperationStation> _opRepository;
 
         public ChartsController(IBaseRepository<AxChart> repository, IBaseRepository<PieChart> pieRepository, IBaseRepository<BarChart> barChartRepository,
             IBaseRepository<NumericWidget> numericWidgetRepository, IBaseRepository<LoginLog> loginlogRepository,
-            IBaseRepository<LineChart> lineRepository, IBaseRepository<HardwareDataHistory> hardRepository,
-            IBaseRepository<ProductInstanceHistory> productInstanceRepository, IBaseRepository<OperationStation> opRepository)
+            IBaseRepository<LineChart> lineRepository, IBaseRepository<HardwareDataHistory> hardRepository)
         {
             _repository = repository;
             _pieRepository = pieRepository;
@@ -43,8 +39,6 @@ namespace API.Controllers.v1.Chart
             _loginlogRepository = loginlogRepository;
             _lineRepository = lineRepository;
             _hardRepository = hardRepository;
-            _productInstanceRepository = productInstanceRepository;
-            _opRepository = opRepository;
         }
 
         [HttpGet("[action]/{chartId}/{filter?}")]
@@ -123,34 +117,18 @@ namespace API.Controllers.v1.Chart
                 var barChart = _barChartRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<BarChartDto>().FirstOrDefault();
                 if (barChart != null)
                 {
-                    if (chart.Id == 17)
-                    {
-                        var pid = 2;
-                        var data = _productInstanceRepository.GetAll(x => !x.ExitTime.HasValue && x.OperationStation.ProductLineId == pid).Include(x => x.OperationStation).ToList().GroupBy(x => x.OpId)
-                             .Select(x => new { Count = x.Count(), x.Key, Data = x })
-                             .ToList();
-                        var a = data.OrderBy(x => x.Data.FirstOrDefault()?.OperationStation.Order).Select(x => x.Count).ToList();
-                        barChart.Series.Add(new AxSeriesDto { Data = a, Name = "تعداد محصول" });
-                        barChart.Labels = data.Select(x => x.Data.FirstOrDefault()?.OperationStation.Name).ToList();
-                        return Ok(barChart);
-                    }
-                    else
-                    {
-
-                        var date = DateTime.Now.AddDays(-15);
-                        var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).ToList()
-                            .GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new
-                            { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) })
-                            .ToList();
-                        //var data = chart.Report.Execute();
-                        var a = data0.Select(x => x.Count).ToList();
-                        var b = data0.Select(x => x.UnScuccessCount).ToList();
-                        barChart.Series[0] = new AxSeriesDto { Data = a, Name = "تعداد ورود به سیستم" };
-                        barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
-                        barChart.Labels = data0.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
-                        return Ok(barChart);
-                    }
-
+                    var date = DateTime.Now.AddDays(-15);
+                    var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).ToList()
+                        .GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new
+                        { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) })
+                        .ToList();
+                    //var data = chart.Report.Execute();
+                    var a = data0.Select(x => x.Count).ToList();
+                    var b = data0.Select(x => x.UnScuccessCount).ToList();
+                    barChart.Series[0] = new AxSeriesDto { Data = a, Name = "تعداد ورود به سیستم" };
+                    barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
+                    barChart.Labels = data0.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
+                    return Ok(barChart);
                 }
             }
             if (chart?.ChartType == AxChartType.List)

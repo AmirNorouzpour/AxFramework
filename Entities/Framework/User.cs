@@ -14,6 +14,8 @@ namespace Entities.Framework
         public bool IsActive { get; set; } = true;
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string Email { get; set; }
+        public string UniqueKey { get; set; }
         public GenderType GenderType { get; set; }
         public DateTime? BirthDate { get; set; }
         public DateTime? ExpireDateTime { get; set; }

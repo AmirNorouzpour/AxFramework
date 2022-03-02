@@ -55,15 +55,13 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<AxGroup> _groupRepository;
 
         /// <inheritdoc />
-        public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<Permission> permissionRepository,
+        public UsersController(IUserRepository userRepository, IJwtService jwtService,IBaseRepository<LoginLog> loginlogRepository,
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
             IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub, IBaseRepository<AxGroup> groupRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
-            _memoryCache = memoryCache;
             _loginlogRepository = loginlogRepository;
-            _permissionRepository = permissionRepository;
             _userTokenRepository = userTokenRepository;
             _menuRepository = menuRepository;
             _configDataRepository = configDataRepository;
@@ -98,19 +96,11 @@ namespace API.Controllers.v1.Basic
 
             #region loginLog And configLoad
 
-            var config = _memoryCache.GetOrCreate(CacheKeys.ConfigData, entry =>
-            {
-                var dataDto = _configDataRepository.TableNoTracking.ProjectTo<ConfigDataDto>().FirstOrDefault(x => x.Active);
-                if (dataDto == null)
-                    throw new NotFoundException("تنظیمات اولیه سامانه به درستی انجام نشده است");
-                return dataDto;
-            });
             var userAgent = Request.Headers["User-Agent"].ToString();
             var uaParser = Parser.GetDefault();
             var info = uaParser.Parse(userAgent);
             var loginlog = new LoginLog
             {
-                AppVersion = config.VersionName,
                 Browser = info.UA.Family,
                 BrowserVersion = info.UA.Major + "." + info.UA.Minor,
                 UserId = user?.Id,
@@ -127,7 +117,7 @@ namespace API.Controllers.v1.Basic
             #endregion
 
             if (user == null)
-                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthenticated, null, "نام کاربری و یا رمز عبور اشتباه است");
+                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthenticated, null, "Username or Password is incorrect!");
 
             var clientId = Guid.NewGuid().ToString();
             var token = await _jwtService.GenerateAsync(user, clientId);
@@ -157,39 +147,39 @@ namespace API.Controllers.v1.Basic
             }, cancellationToken);
 
 
-            var connections = _userConnectionService.GetActiveConnections();
-            var barChart = _barChartRepository.GetAll(x => x.AxChartId == 5).ProjectTo<BarChartDto>().FirstOrDefault();
-            if (barChart != null && barChart.Series?.Count > 0)
-            {
-                var date = DateTime.Now.AddDays(-15);
-                var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).ToList()
-                    .GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new
-                    { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) }).ToList();
-                //var data = chart.Report.Execute();
-                var a = data0.Select(x => x.Count).ToList();
-                var b = data0.Select(x => x.UnScuccessCount).ToList();
-                barChart.Series[0] = new AxSeriesDto { Data = a, Name = "تعداد ورود به سیستم" };
-                barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
-                barChart.Labels = data0.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
-            }
-            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", barChart, cancellationToken);
+            //var connections = _userConnectionService.GetActiveConnections();
+            //var barChart = _barChartRepository.GetAll(x => x.AxChartId == 5).ProjectTo<BarChartDto>().FirstOrDefault();
+            //if (barChart != null && barChart.Series?.Count > 0)
+            //{
+            //    var date = DateTime.Now.AddDays(-15);
+            //    var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).ToList()
+            //        .GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new
+            //        { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) }).ToList();
+            //    //var data = chart.Report.Execute();
+            //    var a = data0.Select(x => x.Count).ToList();
+            //    var b = data0.Select(x => x.UnScuccessCount).ToList();
+            //    barChart.Series[0] = new AxSeriesDto { Data = a, Name = "تعداد ورود به سیستم" };
+            //    barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
+            //    barChart.Labels = data0.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
+            //}
+            //await _hub.Clients.Clients(connections).SendAsync("UpdateChart", barChart, cancellationToken);
 
-            var chart = await _chartRepository.GetAll(x => x.Id == 9).Include(x => x.Report).FirstOrDefaultAsync(cancellationToken);
-            var numericWidget = _numberWidgetRepository.GetAll(x => x.AxChartId == 9).ProjectTo<NumericWidgetDto>().FirstOrDefault();
-            if (chart != null && numericWidget != null)
-            {
-                var data = chart.Report.Execute();
-                numericWidget.Data = (int)data;
-                numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
-            }
-            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", numericWidget, cancellationToken);
+            //var chart = await _chartRepository.GetAll(x => x.Id == 9).Include(x => x.Report).FirstOrDefaultAsync(cancellationToken);
+            //var numericWidget = _numberWidgetRepository.GetAll(x => x.AxChartId == 9).ProjectTo<NumericWidgetDto>().FirstOrDefault();
+            //if (chart != null && numericWidget != null)
+            //{
+            //    var data = chart.Report.Execute();
+            //    numericWidget.Data = (int)data;
+            //    numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
+            //}
+            //await _hub.Clients.Clients(connections).SendAsync("UpdateChart", numericWidget, cancellationToken);
 
 
 
-            await _memoryCache.GetOrCreateAsync("user" + user.Id, entry =>
-              {
-                  return Task.Run(() => PermissionHelper.GetKeysFromDb(_permissionRepository, _userGroupRepository, user.Id), cancellationToken);
-              });
+            //await _memoryCache.GetOrCreateAsync("user" + user.Id, entry =>
+            //  {
+            //      return Task.Run(() => PermissionHelper.GetKeysFromDb(_permissionRepository, _userGroupRepository, user.Id), cancellationToken);
+            //  });
 
             await _userRepository.UpdateLastLoginDateAsync(user, cancellationToken);
 
