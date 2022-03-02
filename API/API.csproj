@@ -6,8 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\v2\" />
-    <Folder Include="wwwroot\" />
+    <Compile Remove="Controllers\v2\**" />
+    <Compile Remove="wwwroot\**" />
+    <Content Remove="Controllers\v2\**" />
+    <Content Remove="wwwroot\**" />
+    <EmbeddedResource Remove="Controllers\v2\**" />
+    <EmbeddedResource Remove="wwwroot\**" />
+    <None Remove="Controllers\v2\**" />
+    <None Remove="wwwroot\**" />
   </ItemGroup>
 
   <ItemGroup>
