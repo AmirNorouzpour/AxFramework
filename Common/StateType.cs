@@ -5,6 +5,7 @@
         Authorized,
         Ignore,
         CheckParent,
-        OnlyToken
+        OnlyToken,
+        UniqueKey,
     }
 }

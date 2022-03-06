@@ -4,6 +4,7 @@ using Common;
 using Common.Exception;
 using Common.Utilities;
 using Data.Repositories;
+using Data.Repositories.UserRepositories;
 using Entities.Framework;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Memory;
@@ -35,10 +36,19 @@ namespace WebFramework.Filters
         {
             var context = filterContext.HttpContext;
             var memoryCache = filterContext.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
-          
+
             var userId = context.User.Identity.GetUserId<int>();
             if (StateType == StateType.OnlyToken && userId <= 0)
-                throw new AppException(ApiResultStatusCode.UnAuthenticated, "شما برای دسترسی به منابع مورد نظر احراز هویت نشده اید", HttpStatusCode.Unauthorized);
+                throw new AppException(ApiResultStatusCode.UnAuthenticated, "UnAuthenticated!!!", HttpStatusCode.Unauthorized);
+
+            if (StateType == StateType.UniqueKey)
+            {
+                var key = context.Request.Headers["key"];
+                var userRepository = filterContext.HttpContext.RequestServices.GetRequiredService<IBaseRepository<User>>();
+                var user = userRepository.GetFirst(x => x.UniqueKey == key.ToString());
+                if (user == null)
+                    throw new AppException(ApiResultStatusCode.UnAuthenticated, "UnAuthenticated Invalid Key!", HttpStatusCode.Unauthorized);
+            }
 
             if (StateType == StateType.Authorized)
             {

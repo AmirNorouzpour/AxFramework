@@ -26,6 +26,7 @@ using UAParser;
 using WebFramework.Api;
 using WebFramework.Filters;
 using WebFramework.UserData;
+using Guid = System.Guid;
 
 namespace API.Controllers.v1.Basic
 {
@@ -55,7 +56,7 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<AxGroup> _groupRepository;
 
         /// <inheritdoc />
-        public UsersController(IUserRepository userRepository, IJwtService jwtService,IBaseRepository<LoginLog> loginlogRepository,
+        public UsersController(IUserRepository userRepository, IJwtService jwtService, IBaseRepository<LoginLog> loginlogRepository, IMemoryCache memoryCache,
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
             IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub, IBaseRepository<AxGroup> groupRepository)
         {
@@ -73,6 +74,7 @@ namespace API.Controllers.v1.Basic
             _chartRepository = chartRepository;
             _barChartRepository = barChartRepository;
             _numberWidgetRepository = numberWidgetRepository;
+            _memoryCache = memoryCache;
             _hub = hub;
             _groupRepository = groupRepository;
         }
@@ -83,7 +85,7 @@ namespace API.Controllers.v1.Basic
         /// <param name="loginDto"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        [AxAuthorize(StateType = StateType.Ignore)]
+        [AxAuthorize(StateType = StateType.UniqueKey)]
         [HttpPost("[action]")]
         public async Task<ApiResult<AccessToken>> AxToken(LoginDto loginDto, CancellationToken cancellationToken)
         {
@@ -107,6 +109,7 @@ namespace API.Controllers.v1.Basic
                 CreatorUserId = user?.Id ?? 0,
                 InvalidPassword = user == null ? loginDto.Password : null,
                 Ip = ip,
+                AppVersion = "FromAxTokenLogin",
                 MachineName = computerName,
                 Os = info.Device + " " + info.OS,
                 UserName = loginDto.Username,
@@ -145,41 +148,6 @@ namespace API.Controllers.v1.Basic
                 var oldTokens = _userTokenRepository.GetAll(t => t.ExpireDateTime < DateTime.Now);
                 _userTokenRepository.DeleteRange(oldTokens);
             }, cancellationToken);
-
-
-            //var connections = _userConnectionService.GetActiveConnections();
-            //var barChart = _barChartRepository.GetAll(x => x.AxChartId == 5).ProjectTo<BarChartDto>().FirstOrDefault();
-            //if (barChart != null && barChart.Series?.Count > 0)
-            //{
-            //    var date = DateTime.Now.AddDays(-15);
-            //    var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).ToList()
-            //        .GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new
-            //        { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) }).ToList();
-            //    //var data = chart.Report.Execute();
-            //    var a = data0.Select(x => x.Count).ToList();
-            //    var b = data0.Select(x => x.UnScuccessCount).ToList();
-            //    barChart.Series[0] = new AxSeriesDto { Data = a, Name = "تعداد ورود به سیستم" };
-            //    barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
-            //    barChart.Labels = data0.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
-            //}
-            //await _hub.Clients.Clients(connections).SendAsync("UpdateChart", barChart, cancellationToken);
-
-            //var chart = await _chartRepository.GetAll(x => x.Id == 9).Include(x => x.Report).FirstOrDefaultAsync(cancellationToken);
-            //var numericWidget = _numberWidgetRepository.GetAll(x => x.AxChartId == 9).ProjectTo<NumericWidgetDto>().FirstOrDefault();
-            //if (chart != null && numericWidget != null)
-            //{
-            //    var data = chart.Report.Execute();
-            //    numericWidget.Data = (int)data;
-            //    numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
-            //}
-            //await _hub.Clients.Clients(connections).SendAsync("UpdateChart", numericWidget, cancellationToken);
-
-
-
-            //await _memoryCache.GetOrCreateAsync("user" + user.Id, entry =>
-            //  {
-            //      return Task.Run(() => PermissionHelper.GetKeysFromDb(_permissionRepository, _userGroupRepository, user.Id), cancellationToken);
-            //  });
 
             await _userRepository.UpdateLastLoginDateAsync(user, cancellationToken);
 
@@ -234,7 +202,7 @@ namespace API.Controllers.v1.Basic
 
 
             if (user == null)
-                return new ApiResult<UserInfo>(false, ApiResultStatusCode.NotFound, null, "کاربر یافت نشد");
+                return new ApiResult<UserInfo>(false, ApiResultStatusCode.NotFound, null, "User not found");
 
 
             var config = _memoryCache.GetOrCreate(CacheKeys.ConfigData, entry =>
@@ -267,6 +235,107 @@ namespace API.Controllers.v1.Basic
             return userInfo;
         }
 
+
+        [HttpGet("[action]")]
+        [AxAuthorize(StateType = StateType.UniqueKey)]
+        public async Task<ApiResult<UserMainData>> GetMainData(CancellationToken cancellationToken)
+        {
+            var user = await _userRepository.GetFirstAsync(x => x.Id == UserId, cancellationToken);
+            var key = Request.Headers["key"];
+            var data = _memoryCache.Get<GlobalResult>(CacheKeys.MainData);
+
+            var userInfo = new UserMainData
+            {
+                UserName = user?.UserName,
+                IsSignedIn = UserId != 0,
+                UserDisplayName = user?.FullName,
+                Email = user?.Email,
+                ExpireDateTime = user?.ExpireDateTime,
+                FGIndex = data
+            };
+            //userInfo.UnReedMsgCount = _userMessageRepository.Count(x => x.Receivers.Any(r => r.PrimaryKey == UserId && !r.IsSeen));
+
+            try
+            {
+                var address = Request.HttpContext.Connection.RemoteIpAddress;
+                var ip = address.GetIp();
+                var userAgent = Request.Headers["User-Agent"].ToString();
+                var uaParser = Parser.GetDefault();
+                var info = uaParser.Parse(userAgent);
+                var loginlog = new LoginLog
+                {
+                    Browser = info.UA.Family,
+                    BrowserVersion = info.UA.Major + "." + info.UA.Minor,
+                    UserId = user?.Id,
+                    CreatorUserId = user?.Id ?? 0,
+                    Ip = ip,
+                    AppVersion = "FromGetMainData",
+                    Os = info.Device + " " + info.OS,
+                    UserName = key.ToString(),
+                    ValidSignIn = user != null,
+                    InsertDateTime = DateTime.Now
+                };
+                await _loginlogRepository.AddAsync(loginlog, cancellationToken);
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            return userInfo;
+        }
+
+        [HttpGet("[action]")]
+        [AxAuthorize(StateType = StateType.Ignore)]
+        public ApiResult<List<Item>> GetNews(CancellationToken cancellationToken)
+        {
+            var data = _memoryCache.Get<List<Item>>(CacheKeys.NewsData);
+            return data;
+        }
+
+        [AxAuthorize(StateType = StateType.Ignore)]
+        [HttpPost("[action]")]
+        public async Task<ApiResult<int>> SetUnique(LoginDto loginDto, CancellationToken cancellationToken)
+        {
+            var user = await _userRepository.GetFirstAsync(x => x.UniqueKey == loginDto.Key, cancellationToken);
+            if (user != null)
+                return user.Id;
+
+            var u = new User
+            {
+                InsertDateTime = DateTime.Now,
+                UniqueKey = loginDto.Key,
+                IsActive = true,
+                UserName = loginDto.Key,
+                FirstName = loginDto.Key,
+                LastName = loginDto.Key,
+
+            };
+            await _userRepository.AddAsync(u, cancellationToken);
+            return u.Id;
+
+        }
+
+        [HttpPost("[action]")]
+        [AxAuthorize(StateType = StateType.UniqueKey)]
+        public async Task<ApiResult<int>> Register(UserDto dto, CancellationToken cancellationToken)
+        {
+            var key = Request.Headers["key"];
+            var user = await _userRepository.GetFirstAsync(x => x.UniqueKey == key.ToString(), cancellationToken);
+            if (!user.BirthDate.HasValue)
+            {
+                user.UserName = dto.UserName;
+                user.Email = dto.Email;
+                user.FirstName = dto.FirstName;
+                user.LastName = dto.LastName;
+                user.BirthDate = DateTime.Now;
+                await _userRepository.UpdateAsync(user, cancellationToken);
+            }
+            return user.Id;
+        }
+
+
+        // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
 
         /// <summary>
         /// Get Signed User Permission keys
@@ -426,7 +495,16 @@ namespace API.Controllers.v1.Basic
             return Ok(result);
         }
 
-     
+
     }
 
+    public class UserMainData
+    {
+        public string UserName { get; set; }
+        public string UserDisplayName { get; set; }
+        public string Email { get; set; }
+        public DateTime? ExpireDateTime { get; set; }
+        public object FGIndex { get; set; }
+        public bool IsSignedIn { get; set; }
+    }
 }
