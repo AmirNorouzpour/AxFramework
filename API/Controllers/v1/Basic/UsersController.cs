@@ -15,6 +15,7 @@ using Data.Repositories.UserRepositories;
 using Entities.Framework;
 using Entities.Framework.AxCharts;
 using Entities.Framework.Reports;
+using Entities.MasterSignal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -286,10 +287,41 @@ namespace API.Controllers.v1.Basic
         }
 
         [HttpGet("[action]")]
-        [AxAuthorize(StateType = StateType.Ignore)]
+        [AxAuthorize(StateType = StateType.UniqueKey)]
         public ApiResult<List<Item>> GetNews(CancellationToken cancellationToken)
         {
             var data = _memoryCache.Get<List<Item>>(CacheKeys.NewsData);
+            return data;
+        }
+
+
+        [HttpGet("[action]")]
+        [AxAuthorize(StateType = StateType.UniqueKey)]
+        public async Task<ApiResult<List<AxPositionDto>>> GetPositions(CancellationToken cancellationToken)
+        {
+            var key = Request.Headers["key"].ToString();
+            var user = await _userRepository.GetFirstAsync(x => x.UniqueKey == key, cancellationToken);
+            var isVip = user?.ExpireDateTime > DateTime.UtcNow;
+            var data = _memoryCache.Get<List<AxPosition>>(CacheKeys.PositionsData).Select(x => new AxPositionDto
+            {
+                EnterPrice = isVip || x.IsFree ? x.EnterPrice.ToString() : "",
+                StopLoss = isVip || x.IsFree ? x.StopLoss.ToString() : "",
+                Id = x.Id,
+                Targets = isVip || x.IsFree ? x.Targets : "",
+                Symbol = x.Symbol,
+                Side = isVip || x.IsFree ? x.Side.ToString() : "",
+                Status = x.Status.ToString(),
+                Leverage = isVip || x.IsFree ? x.Leverage : 0,
+                Capital = isVip || x.IsFree ? x.Capital : "",
+                Risk = x.Risk,
+                Price = x.Price,
+                DateTime = isVip || x.IsFree ? x.DateTime.ToString() : "",
+                IsFree = x.IsFree,
+                Max = isVip || x.IsFree ? x.Max : 0,
+                StopMoved = isVip || x.IsFree ? x.StopMoved : (bool?)null,
+                ProfitPercent = isVip || x.IsFree ? x.ProfitPercent : 0,
+                Result = x.Result.ToString()
+            }).ToList();
             return data;
         }
 

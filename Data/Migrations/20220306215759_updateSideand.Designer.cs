@@ -4,14 +4,16 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220306215759_updateSideand")]
+    partial class updateSideand
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1810,9 +1812,6 @@ namespace Data.Migrations
 
                     b.Property<decimal>("ProfitPercent")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Result")
-                        .HasColumnType("int");
 
                     b.Property<string>("Risk")
                         .HasColumnType("nvarchar(max)");
