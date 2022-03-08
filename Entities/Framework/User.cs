@@ -38,8 +38,6 @@ namespace Entities.Framework
     {
         public UserValidator() {
             RuleFor(x => x.Id).NotNull();
-            RuleFor(x => x.FirstName).NotEmpty();
-            RuleFor(x => x.LastName).NotEmpty();
         }
     }
 

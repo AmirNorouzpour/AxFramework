@@ -238,7 +238,7 @@ namespace API.Controllers.v1.Basic
 
 
         [HttpGet("[action]")]
-        [AxAuthorize(StateType = StateType.UniqueKey)]
+        [AxAuthorize(StateType = StateType.Ignore)]
         public async Task<ApiResult<UserMainData>> GetMainData(CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetFirstAsync(x => x.Id == UserId, cancellationToken);
@@ -299,13 +299,14 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.UniqueKey)]
         public async Task<ApiResult<List<AxPositionDto>>> GetPositions(CancellationToken cancellationToken)
         {
+            var symbols = _memoryCache.Get<List<Symbol>>(CacheKeys.SymbolsData);
             var key = Request.Headers["key"].ToString();
             var user = await _userRepository.GetFirstAsync(x => x.UniqueKey == key, cancellationToken);
             var isVip = user?.ExpireDateTime > DateTime.UtcNow;
             var data = _memoryCache.Get<List<AxPosition>>(CacheKeys.PositionsData).Select(x => new AxPositionDto
             {
-                EnterPrice = isVip || x.IsFree ? x.EnterPrice.ToString() : "",
-                StopLoss = isVip || x.IsFree ? x.StopLoss.ToString() : "",
+                EnterPrice = isVip || x.IsFree ? Format(x.EnterPrice, symbols, x.Symbol).ToString() : "",
+                StopLoss = isVip || x.IsFree ? Format(x.StopLoss, symbols, x.Symbol).ToString() : "",
                 Id = x.Id,
                 Targets = isVip || x.IsFree ? x.Targets : "",
                 Symbol = x.Symbol,
@@ -314,7 +315,7 @@ namespace API.Controllers.v1.Basic
                 Leverage = isVip || x.IsFree ? x.Leverage : 0,
                 Capital = isVip || x.IsFree ? x.Capital : "",
                 Risk = x.Risk,
-                Price = x.Price,
+                Price = Format(x.Price, symbols, x.Symbol),
                 DateTime = isVip || x.IsFree ? x.DateTime.ToString() : "",
                 IsFree = x.IsFree,
                 Max = isVip || x.IsFree ? x.Max : 0,
@@ -323,6 +324,15 @@ namespace API.Controllers.v1.Basic
                 Result = x.Result.ToString()
             }).ToList();
             return data;
+        }
+
+        private static decimal Format(decimal input, List<Symbol> symbols, string symbol)
+        {
+            var s = symbols.FirstOrDefault(x => x.Title == symbol);
+            if (s == null)
+                return input;
+            var format = "n" + s.Decimals;
+            return decimal.Parse(input.ToString(format));
         }
 
         [AxAuthorize(StateType = StateType.Ignore)]
@@ -356,10 +366,11 @@ namespace API.Controllers.v1.Basic
             var user = await _userRepository.GetFirstAsync(x => x.UniqueKey == key.ToString(), cancellationToken);
             if (!user.BirthDate.HasValue)
             {
-                user.UserName = dto.UserName;
-                user.Email = dto.Email;
-                user.FirstName = dto.FirstName;
-                user.LastName = dto.LastName;
+                user.UserName = dto?.UserName;
+                user.Email = dto?.UserName;
+                user.FirstName = dto?.FirstName;
+                user.LastName = dto?.LastName;
+                user.Password = SecurityHelper.GetSha256Hash(dto?.Password);
                 user.BirthDate = DateTime.Now;
                 await _userRepository.UpdateAsync(user, cancellationToken);
             }

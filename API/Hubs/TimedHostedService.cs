@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -8,6 +9,7 @@ using System.Xml.Linq;
 using Microsoft.Extensions.Hosting;
 using API.Models;
 using Common;
+using Dapper;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 
@@ -20,7 +22,6 @@ namespace API.Hubs
 
         public TimedHostedService(IMemoryCache memoryCache)
         {
-
             _memoryCache = memoryCache;
         }
 
@@ -32,6 +33,12 @@ namespace API.Hubs
 
         private void DoWork(object state)
         {
+            using (var db = new SqlConnection("Data Source=.;Database=AxTraderDb;User Id=sa;Password=Amir1993;MultipleActiveResultSets=true"))
+            {
+                var symbols = db.Query<Symbol>("select * from Symbols where IsActive = 1").ToList();
+                _memoryCache.Set(CacheKeys.SymbolsData, symbols);
+            }
+
             CreateGlobalResult();
             GetNews();
         }
@@ -45,14 +52,14 @@ namespace API.Hubs
                 var result = webClient.DownloadString("https://cointelegraph.com/rss");
                 var document = XDocument.Parse(result);
                 var list = (from descendant in document.Descendants("item")
-                    select new Item
-                    {
-                        Title = descendant.Element("title")!.Value,
-                        Category = string.Join(",", descendant.Elements("category").Select(x=> x.Value)),
-                        Link = descendant.Element("link")!.Value,
-                        PublicationDate = DateTime.Parse(descendant.Element("pubDate")!.Value!).ToUniversalTime(),
-                        ImageLink = descendant.Element("enclosure")!.Attribute("url")!.Value,
-                    }).ToList();
+                            select new Item
+                            {
+                                Title = descendant.Element("title")!.Value,
+                                Category = string.Join(",", descendant.Elements("category").Select(x => x.Value)),
+                                Link = descendant.Element("link")!.Value,
+                                PublicationDate = DateTime.Parse(descendant.Element("pubDate")!.Value!).ToUniversalTime(),
+                                ImageLink = descendant.Element("enclosure")!.Attribute("url")!.Value,
+                            }).ToList();
                 _memoryCache.Set(CacheKeys.NewsData, list);
             }
             catch (Exception)
@@ -65,6 +72,7 @@ namespace API.Hubs
         {
             try
             {
+                var symbols = _memoryCache.Get<List<Symbol>>(CacheKeys.SymbolsData);
                 var result = new GlobalResult();
                 var globalFgi = GetGlobal();
                 var globalSymbol = GetGlobalSymbol();
@@ -72,7 +80,7 @@ namespace API.Hubs
                 result.TotalMarketCap = globalFgi.total_market_cap_usd.ToString("n0") + "$";
                 result.TotalVolume24h = globalFgi.total_24h_volume_usd.ToString("n0") + "$";
                 result.Percent24h = decimal.Parse(globalSymbol.percent_change_24h).ToString("n2") + "%";
-                result.Price = decimal.Parse(globalSymbol.price_usd) + "$";
+                result.Price = Format(decimal.Parse(globalSymbol.price_usd), symbols, "BTCUSDT") + "$";
                 result.Fng = Fng()?.data;
                 result.Dom = GetDom()?.ToString("n2") + @"%";
                 _memoryCache.Set(CacheKeys.MainData, result);
@@ -81,6 +89,14 @@ namespace API.Hubs
             {
                 // ignored
             }
+        }
+        private static decimal Format(decimal input, List<Symbol> symbols, string symbol)
+        {
+            var s = symbols.FirstOrDefault(x => x.Title == symbol);
+            if (s == null)
+                return input;
+            var format = "n" + s.Decimals;
+            return decimal.Parse(input.ToString(format));
         }
 
 
