@@ -72,7 +72,6 @@ namespace API.Hubs
         {
             try
             {
-                var symbols = _memoryCache.Get<List<Symbol>>(CacheKeys.SymbolsData);
                 var result = new GlobalResult();
                 var globalFgi = GetGlobal();
                 var globalSymbol = GetGlobalSymbol();
@@ -80,8 +79,8 @@ namespace API.Hubs
                 result.TotalMarketCap = globalFgi.total_market_cap_usd.ToString("n0") + "$";
                 result.TotalVolume24h = globalFgi.total_24h_volume_usd.ToString("n0") + "$";
                 result.Percent24h = decimal.Parse(globalSymbol.percent_change_24h).ToString("n2") + "%";
-                result.Price = Format(decimal.Parse(globalSymbol.price_usd), symbols, "BTCUSDT") + "$";
-                result.Fng = Fng()?.data;
+                result.Price =decimal.Parse(globalSymbol.price_usd).ToString("###")+ "$";
+                result.Fng = Fng();
                 result.Dom = GetDom()?.ToString("n2") + @"%";
                 _memoryCache.Set(CacheKeys.MainData, result);
             }
@@ -90,15 +89,6 @@ namespace API.Hubs
                 // ignored
             }
         }
-        private static decimal Format(decimal input, List<Symbol> symbols, string symbol)
-        {
-            var s = symbols.FirstOrDefault(x => x.Title == symbol);
-            if (s == null)
-                return input;
-            var format = "n" + s.Decimals;
-            return decimal.Parse(input.ToString(format));
-        }
-
 
         public Task StopAsync(CancellationToken stoppingToken)
         {
@@ -127,12 +117,21 @@ namespace API.Hubs
             return res?.FirstOrDefault();
         }
 
-        private FGModel Fng()
+        private List<FGModelRes> Fng()
         {
             using var wc = new WebClient();
-            var contents = wc.DownloadString("https://api.alternative.me/fng/?limit=32");
+            var contents = wc.DownloadString("https://api.alternative.me/fng/?limit=31&date_format=kr");
             var res = JsonConvert.DeserializeObject<FGModel>(contents);
-            return res;
+            var list = new List<FGModelRes>();
+            var now = res!.data.FirstOrDefault();
+            list.Add(new FGModelRes{date = "Now", value = now!.value, name = now.value_classification});
+            var yesterday = res.data.Skip(1).FirstOrDefault();
+            list.Add(new FGModelRes{date = "Yesterday", value = yesterday!.value, name = yesterday.value_classification});
+            var week = res.data.Skip(7).FirstOrDefault();
+            list.Add(new FGModelRes{date = "Last Week", value = week!.value, name = week.value_classification});
+            var month = res.data.Skip(30).FirstOrDefault();
+            list.Add(new FGModelRes{date = "Last Month", value = month!.value, name = month.value_classification});
+            return list;
         }
 
         private decimal? GetDom()

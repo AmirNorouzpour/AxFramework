@@ -43,14 +43,14 @@ namespace API.Models
         public long LastUpdated { get; set; }
         public string Price { get; set; }
         public string Dom { get; set; }
-        public List<FG> Fng { get; set; }
+        public List<FGModelRes> Fng { get; set; }
     }
 
     public class FG
     {
         public string value { get; set; }
         public string value_classification { get; set; }
-        public long timestamp { get; set; }
+        public string timestamp { get; set; }
         public long time_until_update { get; set; }
     }
 
@@ -64,6 +64,13 @@ namespace API.Models
         public string name { get; set; }
         public List<FG> data { get; set; }
         public Metadata metadata { get; set; }
+    }
+
+    public class FGModelRes
+    {
+        public string date { get; set; }
+        public string value { get; set; }
+        public string name { get; set; }
     }
     public class Roi
     {

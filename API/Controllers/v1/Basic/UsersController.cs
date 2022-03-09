@@ -238,7 +238,7 @@ namespace API.Controllers.v1.Basic
 
 
         [HttpGet("[action]")]
-        [AxAuthorize(StateType = StateType.Ignore)]
+        [AxAuthorize(StateType = StateType.UniqueKey)]
         public async Task<ApiResult<UserMainData>> GetMainData(CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetFirstAsync(x => x.Id == UserId, cancellationToken);
