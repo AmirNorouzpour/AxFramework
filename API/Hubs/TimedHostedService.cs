@@ -72,14 +72,22 @@ namespace API.Hubs
         {
             try
             {
+                var symbols = _memoryCache.Get<List<Symbol>>(CacheKeys.SymbolsData);
+                var btc = symbols.FirstOrDefault(x => x.Title == "BTCUSDT");
+                var eth = symbols.FirstOrDefault(x => x.Title == "ETHUSDT");
+
                 var result = new GlobalResult();
                 var globalFgi = GetGlobal();
-                var globalSymbol = GetGlobalSymbol();
+                var globalSymbol = GetGlobalSymbol("bitcoin");
+                var globalEthSymbol = GetGlobalSymbol("ethereum");
                 result.LastUpdated = globalFgi.last_updated;
                 result.TotalMarketCap = globalFgi.total_market_cap_usd.ToString("n0") + "$";
                 result.TotalVolume24h = globalFgi.total_24h_volume_usd.ToString("n0") + "$";
-                result.Percent24h = decimal.Parse(globalSymbol.percent_change_24h).ToString("n2") + "%";
-                result.Price =decimal.Parse(globalSymbol.price_usd).ToString("###")+ "$";
+                result.BTCPercent24h = decimal.Parse(globalSymbol.percent_change_24h).ToString("n2") + "%";
+                result.ETHPercent24h = decimal.Parse(globalEthSymbol.percent_change_24h).ToString("n2") + "%";
+                result.BTCPrice = btc?.Price != null ? btc?.Price.GetValueOrDefault().ToString("###.#") + "$" : decimal.Parse(globalSymbol.price_usd).ToString("###.#") + "$";
+                result.ETHPrice = eth?.Price != null ? eth?.Price.GetValueOrDefault().ToString("###.##") + "$" : decimal.Parse(globalEthSymbol.price_usd).ToString("###.#") + "$";
+                ;
                 result.Fng = Fng();
                 result.Dom = GetDom()?.ToString("n2") + @"%";
                 _memoryCache.Set(CacheKeys.MainData, result);
@@ -109,10 +117,10 @@ namespace API.Hubs
             return res;
         }
 
-        private GlobalSymbol GetGlobalSymbol()
+        private GlobalSymbol GetGlobalSymbol(string symbol)
         {
             using var wc = new WebClient();
-            var contents = wc.DownloadString("https://api.alternative.me/v1/ticker/bitcoin");
+            var contents = wc.DownloadString("https://api.alternative.me/v1/ticker/" + symbol);
             var res = JsonConvert.DeserializeObject<List<GlobalSymbol>>(contents);
             return res?.FirstOrDefault();
         }
@@ -124,13 +132,13 @@ namespace API.Hubs
             var res = JsonConvert.DeserializeObject<FGModel>(contents);
             var list = new List<FGModelRes>();
             var now = res!.data.FirstOrDefault();
-            list.Add(new FGModelRes{date = "Now", value = now!.value, name = now.value_classification});
+            list.Add(new FGModelRes { date = "Now", value = now!.value, name = now.value_classification });
             var yesterday = res.data.Skip(1).FirstOrDefault();
-            list.Add(new FGModelRes{date = "Yesterday", value = yesterday!.value, name = yesterday.value_classification});
+            list.Add(new FGModelRes { date = "Yesterday", value = yesterday!.value, name = yesterday.value_classification });
             var week = res.data.Skip(7).FirstOrDefault();
-            list.Add(new FGModelRes{date = "Last Week", value = week!.value, name = week.value_classification});
+            list.Add(new FGModelRes { date = "Last Week", value = week!.value, name = week.value_classification });
             var month = res.data.Skip(30).FirstOrDefault();
-            list.Add(new FGModelRes{date = "Last Month", value = month!.value, name = month.value_classification});
+            list.Add(new FGModelRes { date = "Last Month", value = month!.value, name = month.value_classification });
             return list;
         }
 

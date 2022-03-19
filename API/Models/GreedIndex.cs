@@ -36,12 +36,14 @@ namespace API.Models
 
     public class GlobalResult
     {
-        public string Percent24h;
+        public string BTCPercent24h;
+        public string BTCPrice;
+        public string ETHPrice;
+        public string ETHPercent24h;
         public string BitcoinPercentageOfMarketCap { get; set; }
         public string TotalMarketCap { get; set; }
         public string TotalVolume24h { get; set; }
         public long LastUpdated { get; set; }
-        public string Price { get; set; }
         public string Dom { get; set; }
         public List<FGModelRes> Fng { get; set; }
     }

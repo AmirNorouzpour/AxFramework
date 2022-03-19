@@ -62,6 +62,7 @@ namespace API
             services.AddHostedService<TimedAuditLogHostedService>();
             services.AddHostedService<TimedHostedService>();
             services.AddHostedService<SocketHostedService>();
+            services.AddHostedService<TimedHostedSymbolService>();
             services.AddSwagger();
             services.AddSignalR();
             services.Configure<ApiBehaviorOptions>(options =>

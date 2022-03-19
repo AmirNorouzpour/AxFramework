@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using API.Hubs;
 using API.Models;
 using AutoMapper.QueryableExtensions;
@@ -55,11 +59,12 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<NumericWidget> _numberWidgetRepository;
         private readonly IHubContext<AxHub> _hub;
         private readonly IBaseRepository<AxGroup> _groupRepository;
+        private readonly IBaseRepository<AxSignal> _signalsRepository;
 
         /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IBaseRepository<LoginLog> loginlogRepository, IMemoryCache memoryCache,
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
-            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub, IBaseRepository<AxGroup> groupRepository)
+            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub, IBaseRepository<AxGroup> groupRepository, IBaseRepository<AxSignal> signalsRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -78,6 +83,7 @@ namespace API.Controllers.v1.Basic
             _memoryCache = memoryCache;
             _hub = hub;
             _groupRepository = groupRepository;
+            _signalsRepository = signalsRepository;
         }
 
         /// <summary>
@@ -90,6 +96,78 @@ namespace API.Controllers.v1.Basic
         [HttpPost("[action]")]
         public async Task<ApiResult<AccessToken>> AxToken(LoginDto loginDto, CancellationToken cancellationToken)
         {
+            var passwordHash = SecurityHelper.GetSha256Hash(loginDto.Password);
+            var user = await _userRepository.GetFirstAsync(x => x.UserName == loginDto.Username && x.Password == passwordHash, cancellationToken);
+
+            var address = Request.HttpContext.Connection.RemoteIpAddress;
+            var computerName = address.GetDeviceName();
+            var ip = address.GetIp();
+
+            #region loginLog And configLoad
+
+            var userAgent = Request.Headers["User-Agent"].ToString();
+            var uaParser = Parser.GetDefault();
+            var info = uaParser.Parse(userAgent);
+            var loginlog = new LoginLog
+            {
+                Browser = info.UA.Family,
+                BrowserVersion = info.UA.Major + "." + info.UA.Minor,
+                UserId = user?.Id,
+                CreatorUserId = user?.Id ?? 0,
+                InvalidPassword = user == null ? loginDto.Password : null,
+                Ip = ip,
+                AppVersion = "FromAxTokenLogin",
+                MachineName = computerName,
+                Os = info.Device + " " + info.OS,
+                UserName = loginDto.Username,
+                ValidSignIn = user != null,
+                InsertDateTime = DateTime.Now
+            };
+            await _loginlogRepository.AddAsync(loginlog, cancellationToken);
+            #endregion
+
+            if (user == null)
+                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthenticated, null, "Username or Password is incorrect!");
+
+            var clientId = Guid.NewGuid().ToString();
+            var token = await _jwtService.GenerateAsync(user, clientId);
+
+            var userToken = new UserToken
+            {
+                Active = true,
+                Token = token.access_token,
+                UserAgent = userAgent,
+                Ip = ip,
+                DeviceName = computerName,
+                UserId = user.Id,
+                ClientId = clientId,
+                CreatorUserId = user.Id,
+                InsertDateTime = DateTime.Now,
+                Browser = info.UA.ToString(),
+                ExpireDateTime = token.expires_in.UnixTimeStampToDateTime()
+            };
+
+            //Response.Cookies.Append("AxToken", token.access_token);
+            await _userTokenRepository.AddAsync(userToken, cancellationToken);
+
+            await Task.Run(() =>
+            {
+                var oldTokens = _userTokenRepository.GetAll(t => t.ExpireDateTime < DateTime.Now);
+                _userTokenRepository.DeleteRange(oldTokens);
+            }, cancellationToken);
+
+            await _userRepository.UpdateLastLoginDateAsync(user, cancellationToken);
+
+            return token;
+        }
+
+        [AxAuthorize(StateType = StateType.UniqueKey)]
+        [HttpPost("[action]")]
+        public async Task<ApiResult<AccessToken>> AxToken2(LoginDto loginDto, CancellationToken cancellationToken)
+        {
+            if (loginDto.Username != "admin")
+                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthenticated, null, "Username or Password is incorrect!");
+
             var passwordHash = SecurityHelper.GetSha256Hash(loginDto.Password);
             var user = await _userRepository.GetFirstAsync(x => x.UserName == loginDto.Username && x.Password == passwordHash, cancellationToken);
 
@@ -235,6 +313,41 @@ namespace API.Controllers.v1.Basic
             userInfo.UnReedMsgCount = _userMessageRepository.Count(x => x.Receivers.Any(r => r.PrimaryKey == UserId && !r.IsSeen));
             return userInfo;
         }
+
+        [HttpGet("[action]")]
+        [AxAuthorize(StateType = StateType.OnlyToken)]
+        public async Task<ApiResult<IQueryable<AxSignal>>> GetSignals()
+        {
+            var user = _userRepository.GetFirst(x => x.Id == UserId);
+            if (user.UserName != "admin")
+                return null;
+            var signals = _signalsRepository.GetAll().OrderByDescending(x => x.InsertDateTime);
+            return Ok(signals);
+        }
+
+        //[HttpGet("[action]")]
+        //[AxAuthorize(StateType = StateType.Ignore)]
+        //public async Task<FileResult> GetSymbolChart(CancellationToken cancellationToken)
+        //{
+        //    var bmp = new Bitmap(1800, 600);
+        //    var blackPen = new Pen(Color.LimeGreen, 3);
+
+        //    var list = new List<Point>();
+        //    for (var i = 1; i <= 50; i++)
+        //    {
+        //        Thread.Sleep(10);
+        //        list.Add(new Point(i * 75, new Random((int)DateTime.Now.Ticks).Next(30, 550)));
+        //    }
+
+
+        //    using (var graphics = Graphics.FromImage(bmp))
+        //    {
+        //        graphics.DrawCurve(blackPen, list.ToArray());
+        //        pictureBox1.Image = bmp;
+        //        bmp.Save(@"F:\test.png");
+        //    }
+        //}
+
 
 
         [HttpGet("[action]")]
@@ -405,6 +518,10 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.OnlyToken, Order = 0, AxOp = AxOp.UserList, ShowInMenu = true)]
         public ApiResult<IQueryable<UserSelectDto>> Get([FromQuery] DataRequest request)
         {
+            var user = _userRepository.GetFirst(x => x.Id == UserId);
+            if (user.UserName != "admin")
+                return null;
+
             var predicate = request.GetFilter<User>();
             var users = _userRepository.GetAll(predicate).OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<UserSelectDto>();
             Response.Headers.Add("X-Pagination", _userRepository.Count(predicate).ToString());
