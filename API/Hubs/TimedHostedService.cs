@@ -81,13 +81,12 @@ namespace API.Hubs
                 var globalSymbol = GetGlobalSymbol("bitcoin");
                 var globalEthSymbol = GetGlobalSymbol("ethereum");
                 result.LastUpdated = globalFgi.last_updated;
-                result.TotalMarketCap = globalFgi.total_market_cap_usd.ToString("n0") + "$";
-                result.TotalVolume24h = globalFgi.total_24h_volume_usd.ToString("n0") + "$";
+                result.TotalMarketCap = globalFgi.total_market_cap_usd.ToString("n0") ;
+                result.TotalVolume24h = globalFgi.total_24h_volume_usd.ToString("n0") ;
                 result.BTCPercent24h = decimal.Parse(globalSymbol.percent_change_24h).ToString("n2") + "%";
                 result.ETHPercent24h = decimal.Parse(globalEthSymbol.percent_change_24h).ToString("n2") + "%";
-                result.BTCPrice = btc?.Price != null ? btc?.Price.GetValueOrDefault().ToString("###.#") + "$" : decimal.Parse(globalSymbol.price_usd).ToString("###.#") + "$";
-                result.ETHPrice = eth?.Price != null ? eth?.Price.GetValueOrDefault().ToString("###.##") + "$" : decimal.Parse(globalEthSymbol.price_usd).ToString("###.#") + "$";
-                ;
+                result.BTCPrice = btc?.Price != null ? btc.Price.GetValueOrDefault().ToString("n2") : decimal.Parse(globalSymbol.price_usd).ToString("n2");
+                result.ETHPrice = eth?.Price != null ? eth.Price.GetValueOrDefault().ToString("n2") : decimal.Parse(globalEthSymbol.price_usd).ToString("n2");
                 result.Fng = Fng();
                 result.Dom = GetDom()?.ToString("n2") + @"%";
                 _memoryCache.Set(CacheKeys.MainData, result);
@@ -145,7 +144,7 @@ namespace API.Hubs
         private decimal? GetDom()
         {
             var url = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false";
-            using var wc = new System.Net.WebClient();
+            using var wc = new WebClient();
             var contents = wc.DownloadString(url);
             var data = JsonConvert.DeserializeObject<List<DomModel>>(contents);
 

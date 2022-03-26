@@ -60,7 +60,8 @@ namespace API.Hubs
                                 Low = candle.LowPrice,
                                 HaLow = candle.LowPrice,
                                 Close = candle.ClosePrice,
-                                HaClose = candle.ClosePrice
+                                HaClose = candle.ClosePrice,
+                                Date = candle.OpenTime.ToLocalTime(),
                             }
                         );
                     }
@@ -77,7 +78,8 @@ namespace API.Hubs
                                 Low = candle.LowPrice,
                                 HaLow = Math.Min(Math.Min(candle.LowPrice, pre.HaOpen), pre.HaClose),
                                 Close = candle.ClosePrice,
-                                HaClose = (candle.ClosePrice + candle.OpenPrice + candle.LowPrice + candle.HighPrice) / 4
+                                HaClose = (candle.ClosePrice + candle.OpenPrice + candle.LowPrice + candle.HighPrice) / 4,
+                                Date = candle.OpenTime.ToLocalTime()
                             }
                         );
                     }
@@ -98,8 +100,24 @@ namespace API.Hubs
                     if (us < ds)
                         div = ds / us;
 
-                    if (body * 5 < us + ds && div < (decimal)1.2)
-                        TelegramUtil.SendToTelegram($"#{symbol} in #60m closed with #HADoji at {DateTime.Now:dd MMM HH:mm:ss}");
+                    var axRsi = new AxRsi(14);
+                    axRsi.Load(axbs.Candles.Select(candle => new AxOhlc
+                    {
+                        Open = candle.Open,
+                        High = candle.High,
+                        Low = candle.Low,
+                        Close = candle.Close,
+                        Date = candle.Date
+
+                    }).ToList());
+
+                    var rsis = axRsi.Calculate();
+                    var r0 = rsis[^1].Rsi;
+                    var r1 = rsis[^2].Rsi;
+
+
+                    if (body * 5 < us + ds && div < (decimal)1.2 && r0 is > 65 or < 35)
+                        TelegramUtil.SendToTelegram($"#{symbol} in #60m closed with #HA-DOJI #RSI: {r0} at {DateTime.Now:dd MMM HH:mm:ss}");
                 }
             }
         }
@@ -146,6 +164,6 @@ namespace API.Hubs
         public decimal HaLow { get; set; }
         public decimal Close { get; set; }
         public decimal HaClose { get; set; }
-
+        public DateTime Date { get; set; }
     }
 }
