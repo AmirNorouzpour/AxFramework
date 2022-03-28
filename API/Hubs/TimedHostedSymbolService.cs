@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using API.Models;
 using Binance.Net.Clients;
 using Binance.Net.Enums;
+using Common;
 using Common.Utilities;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Hosting;
 
 namespace API.Hubs
@@ -14,8 +17,10 @@ namespace API.Hubs
     {
         private Timer _timer;
         private readonly BinanceClient _client;
-        public TimedHostedSymbolService()
+        private readonly IMemoryCache _memoryCache;
+        public TimedHostedSymbolService(IMemoryCache memoryCache)
         {
+            _memoryCache = memoryCache;
             _client = new BinanceClient();
         }
         DateTime _last = DateTime.Now;
@@ -35,9 +40,11 @@ namespace API.Hubs
                 "COMPUSDT", "SOLUSDT", "KAVAUSDT", "XTZUSDT", "CHZUSDT", "SUSHIUSDT", "EGLDUSDT"
             };
 
+            var symbols = _memoryCache.Get<List<Symbol>>(CacheKeys.SymbolsData);
             foreach (var symbol in list)
             {
-                var data = await _client.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, KlineInterval.OneHour, null, null,
+                var symbol0 = symbols.FirstOrDefault(x => x.Title == symbol);
+                     var data = await _client.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, KlineInterval.OneHour, null, null,
                     50, stoppingToken);
                 var axbs = new AxBs
                 {
@@ -117,7 +124,7 @@ namespace API.Hubs
 
 
                     if (body * 5 < us + ds && div < (decimal)1.2 && r0 is > 65 or < 35)
-                        TelegramUtil.SendToTelegram($"#{symbol} in #60m closed with #HA-DOJI #RSI: {r0:n2} at {DateTime.Now:dd MMM HH:mm:ss}");
+                        TelegramUtil.SendToTelegram($"#{symbol} closed with #HADOJI at : {rsis[^1]!.Close.ToString("n" + symbol0!.Decimals)} #RSI: {r0:n2} at {DateTime.Now:dd MMM HH:mm:ss}");
                 }
             }
         }
