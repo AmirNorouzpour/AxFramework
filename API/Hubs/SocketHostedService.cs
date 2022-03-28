@@ -56,7 +56,6 @@ namespace API.Hubs
         }
 
 
-
         public Task StopAsync(CancellationToken stoppingToken)
         {
             return Task.CompletedTask;
@@ -65,8 +64,5 @@ namespace API.Hubs
         public void Dispose()
         {
         }
-
-
-
     }
 }

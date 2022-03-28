@@ -416,24 +416,26 @@ namespace API.Controllers.v1.Basic
             var key = Request.Headers["key"].ToString();
             var user = await _userRepository.GetFirstAsync(x => x.UniqueKey == key, cancellationToken);
             var isVip = user?.ExpireDateTime > DateTime.UtcNow;
-            var data = _memoryCache.Get<List<AxPosition>>(CacheKeys.PositionsData).Select(x => new AxPositionDto
+            var list = _memoryCache.Get<List<AxPosition>>(CacheKeys.PositionsData);
+            var data = list.Select(x => new AxPositionDto
             {
                 EnterPrice = isVip || x.IsFree ? Format(x.EnterPrice, symbols, x.Symbol).ToString() : "",
                 StopLoss = isVip || x.IsFree ? Format(x.StopLoss, symbols, x.Symbol).ToString() : "",
                 Id = x.Id,
                 Targets = isVip || x.IsFree ? x.Targets : "",
-                Symbol = x.Symbol,
+                Symbol = x.Symbol.Replace("USDT", "/USDT"),
                 Side = isVip || x.IsFree ? x.Side.ToString() : "",
                 Status = x.Status.ToString(),
                 Leverage = isVip || x.IsFree ? x.Leverage : 0,
                 Capital = isVip || x.IsFree ? x.Capital : "",
                 Risk = x.Risk,
                 Price = Format(x.Price, symbols, x.Symbol),
-                DateTime = isVip || x.IsFree ? x.DateTime.ToString() : "",
+                DateTime = isVip || x.IsFree ? x.DateTime.ToString("yyyy/MM/dd HH:mm") : "",
                 IsFree = x.IsFree,
-                Max = isVip || x.IsFree ? x.Max : 0,
-                StopMoved = isVip || x.IsFree ? x.StopMoved : (bool?)null,
-                ProfitPercent = isVip || x.IsFree ? x.ProfitPercent : 0,
+                Max = isVip || x.IsFree ? decimal.Parse(x.Max.ToString("n2")) : 0,
+                StopMoved = isVip || x.IsFree ? x.StopMoved : null,
+                ProfitPercent = isVip || x.IsFree ? decimal.Parse(x.ProfitPercent.ToString("n2")) : 0,
+                LeverageMode = x.SuggestedLeverage,
                 Result = x.Result.ToString()
             }).ToList();
             return data;

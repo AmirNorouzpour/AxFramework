@@ -117,7 +117,7 @@ namespace API.Hubs
 
 
                     if (body * 5 < us + ds && div < (decimal)1.2 && r0 is > 65 or < 35)
-                        TelegramUtil.SendToTelegram($"#{symbol} in #60m closed with #HA-DOJI #RSI: {r0} at {DateTime.Now:dd MMM HH:mm:ss}");
+                        TelegramUtil.SendToTelegram($"#{symbol} in #60m closed with #HA-DOJI #RSI: {r0:n2} at {DateTime.Now:dd MMM HH:mm:ss}");
                 }
             }
         }

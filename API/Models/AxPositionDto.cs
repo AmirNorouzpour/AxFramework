@@ -19,7 +19,7 @@ namespace API.Models
         public string Risk { get; set; }
         public string Capital { get; set; }
         public decimal Leverage { get; set; }
-        public string SuggestedLeverage { get; set; }
+        public string LeverageMode { get; set; }
         public string Status { get; set; }
         public bool IsFree { get; set; }
         public bool? StopMoved { get; set; }

@@ -23,7 +23,7 @@ namespace Entities.MasterSignal
 
     public class AxPosition : BaseEntity
     {
-        public int AxSignalId { get; set; }
+        public int? AxSignalId { get; set; }
         [ForeignKey("AxSignalId")]
         public AxSignal AxSignal { get; set; }
         public string Symbol { get; set; }

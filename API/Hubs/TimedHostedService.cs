@@ -35,7 +35,7 @@ namespace API.Hubs
         {
             using (var db = new SqlConnection("Data Source=.;Database=AxTraderDb;User Id=sa;Password=Amir1993;MultipleActiveResultSets=true"))
             {
-                var symbols = db.Query<Symbol>("select * from Symbols where IsActive = 1").ToList();
+                var symbols = db.Query<Symbol>("select * from Symbols").ToList();
                 _memoryCache.Set(CacheKeys.SymbolsData, symbols);
             }
 
