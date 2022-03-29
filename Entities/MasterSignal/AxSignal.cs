@@ -128,7 +128,7 @@ namespace Entities.MasterSignal
     public class AnalysisMsg : BaseEntity
     {
         public string Content { get; set; }
-        public bool Title { get; set; }
+        public string Title { get; set; }
         public string Tags { get; set; }
         public string Side { get; set; }
         public int Views { get; set; }

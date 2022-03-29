@@ -60,11 +60,12 @@ namespace API.Controllers.v1.Basic
         private readonly IHubContext<AxHub> _hub;
         private readonly IBaseRepository<AxGroup> _groupRepository;
         private readonly IBaseRepository<AxSignal> _signalsRepository;
+        private readonly IBaseRepository<AnalysisMsg> _analysisMsgRepository;
 
         /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IBaseRepository<LoginLog> loginlogRepository, IMemoryCache memoryCache,
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
-            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub, IBaseRepository<AxGroup> groupRepository, IBaseRepository<AxSignal> signalsRepository)
+            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub, IBaseRepository<AxGroup> groupRepository, IBaseRepository<AxSignal> signalsRepository, IBaseRepository<AnalysisMsg> analysisMsgRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -84,6 +85,7 @@ namespace API.Controllers.v1.Basic
             _hub = hub;
             _groupRepository = groupRepository;
             _signalsRepository = signalsRepository;
+            _analysisMsgRepository = analysisMsgRepository;
         }
 
         /// <summary>
@@ -439,6 +441,28 @@ namespace API.Controllers.v1.Basic
                 Result = x.Result.ToString()
             }).ToList();
             return data;
+        }
+
+
+        [HttpGet("[action]/{type}")]
+        [AxAuthorize(StateType = StateType.UniqueKey)]
+        public async Task<ApiResult<List<AnalysisMsgDto>>> GetMsg(AnalysisMsgType type, CancellationToken cancellationToken)
+        {
+            var key = Request.Headers["key"].ToString();
+            var user = await _userRepository.GetFirstAsync(x => x.UniqueKey == key, cancellationToken);
+            var isVip = user?.ExpireDateTime > DateTime.UtcNow;
+            var list = _analysisMsgRepository.GetAll(x => x.Type == type).OrderByDescending(x => x.DateTime).Take(30);
+            var data = list.Select(x => new AnalysisMsgDto
+            {
+                Title = x.Title,
+                Side = x.Side,
+                DateTime = x.DateTime.ToString("yyyy/MM/dd HH:mm"),
+                Content = x.Content,
+                Tags = x.Tags,
+                Type = x.Type.ToString(),
+                Views = 0
+            });
+            return data.ToList();
         }
 
         private static decimal Format(decimal input, List<Symbol> symbols, string symbol)
