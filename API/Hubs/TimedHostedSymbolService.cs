@@ -44,8 +44,8 @@ namespace API.Hubs
             foreach (var symbol in list)
             {
                 var symbol0 = symbols.FirstOrDefault(x => x.Title == symbol);
-                     var data = await _client.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, KlineInterval.OneHour, null, null,
-                    50, stoppingToken);
+                var data = await _client.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, KlineInterval.OneHour, null, null,
+               50, stoppingToken);
                 var axbs = new AxBs
                 {
                     Candles = new List<AxBsCandle>(),
@@ -60,6 +60,7 @@ namespace API.Hubs
                         axbs.Candles.Add(
                             new AxBsCandle
                             {
+                                Index = i + 1,
                                 Open = candle.OpenPrice,
                                 HaOpen = candle.OpenPrice,
                                 High = candle.HighPrice,
@@ -86,7 +87,8 @@ namespace API.Hubs
                                 HaLow = Math.Min(Math.Min(candle.LowPrice, pre.HaOpen), pre.HaClose),
                                 Close = candle.ClosePrice,
                                 HaClose = (candle.ClosePrice + candle.OpenPrice + candle.LowPrice + candle.HighPrice) / 4,
-                                Date = candle.OpenTime.ToLocalTime()
+                                Date = candle.OpenTime.ToLocalTime(),
+                                Index = i + 1,
                             }
                         );
                     }
@@ -118,13 +120,23 @@ namespace API.Hubs
 
                     }).ToList());
 
+                    var listRange = axbs.Candles.GetRange(axbs.Candles.Count - 200, 200);
+                    var h = listRange.Max(x => x.High);
+                    var l = listRange.Min(x => x.Low);
+
+                    var lastI = listRange.LastOrDefault()!.Index;
+                    var high = listRange.LastOrDefault(x => x.High == h);
+                    var low = listRange.LastOrDefault(x => x.Low == l);
+                    var hi = (lastI - high!.Index);
+                    var li = (lastI - low!.Index);
+
                     var rsis = axRsi.Calculate();
                     var r0 = rsis[^1].Rsi;
-                    var r1 = rsis[^2].Rsi;
+                    //var r1 = rsis[^2].Rsi;
 
 
                     if (body * 5 < us + ds && div < (decimal)1.2 && r0 is > 65 or < 35)
-                        TelegramUtil.SendToTelegram($"#{symbol} closed with #HADOJI at : {rsis[^1]!.Close.ToString("n" + symbol0!.Decimals)} #RSI: {r0:n2} at {DateTime.Now:dd MMM HH:mm:ss}");
+                        TelegramUtil.SendToTelegram($"#{symbol} closed with #HADOJI at : {rsis[^1]!.Close.ToString("n" + symbol0!.Decimals)} #RSI: {r0:n2} H:{hi} L:{li} at {DateTime.Now:dd MMM HH:mm:ss}");
                 }
             }
         }
@@ -172,5 +184,6 @@ namespace API.Hubs
         public decimal Close { get; set; }
         public decimal HaClose { get; set; }
         public DateTime Date { get; set; }
+        public int Index { get; set; }
     }
 }
