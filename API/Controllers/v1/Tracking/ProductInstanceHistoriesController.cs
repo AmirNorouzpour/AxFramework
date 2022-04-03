@@ -26,11 +26,11 @@ namespace API.Controllers.v1.Tracking
 
         [HttpGet]
         [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.ProductInstanceHistoryList)]
-        public virtual ApiResult<IQueryable<ProductInstanceHistoryDto>> Get([FromQuery] DataRequest request, long? code = null, long? op = null, string userIds = null, DateTime? date = null)
+        public virtual ApiResult<IQueryable<ProductInstanceHistoryDto>> Get([FromQuery] DataRequest request, string code = null, long? op = null, string userIds = null, DateTime? date = null)
         {
 
             var data0 = _repository.GetAll();
-            if (code.HasValue)
+            if (!string.IsNullOrWhiteSpace(code))
                 data0 = data0.Where(x => x.ProductInstance.Code == code);
 
             if (userIds != null)
@@ -52,10 +52,10 @@ namespace API.Controllers.v1.Tracking
 
         [HttpGet("ExportToXlsx")]
         [AxAuthorize(StateType = StateType.Ignore, AxOp = AxOp.ProductInstanceHistoryList)]
-        public Task<FileContentResult> ExportToXlsx(long? code = null, long? op = null, string userIds = null, DateTime? date = null)
+        public Task<FileContentResult> ExportToXlsx(string code = null, long? op = null, string userIds = null, DateTime? date = null)
         {
             var data0 = _repository.GetAll();
-            if (code.HasValue)
+            if (!string.IsNullOrWhiteSpace(code))
                 data0 = data0.Where(x => x.ProductInstance.Code == code);
 
             if (userIds != null)

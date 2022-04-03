@@ -48,11 +48,11 @@ namespace API.Controllers.v1.Tracking
 
         [HttpGet]
         [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.ProductInstanceList)]
-        public virtual ApiResult<IQueryable<ProductInstanceDto>> Get([FromQuery] DataRequest request, long? code = null, string userIds = null, DateTime? date = null)
+        public virtual ApiResult<IQueryable<ProductInstanceDto>> Get([FromQuery] DataRequest request, string code = null, string userIds = null, DateTime? date = null)
         {
             //var predicate = request.GetFilter<ProductInstance>();
             var data0 = _repository.GetAll();
-            if (code.HasValue)
+            if (!string.IsNullOrWhiteSpace(code))
                 data0 = data0.Where(x => x.Code == code);
 
             if (userIds != null)

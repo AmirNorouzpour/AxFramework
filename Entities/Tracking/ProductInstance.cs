@@ -7,7 +7,7 @@ namespace Entities.Tracking
 {
     public class ProductInstance : BaseEntity
     {
-        public long Code { get; set; }
+        public string Code { get; set; }
         public int UserId { get; set; }
         public int PersonnelId { get; set; }
         [ForeignKey("PersonnelId")]

@@ -11,7 +11,7 @@ namespace API.Models.Tracking
     public class ProductInstanceDto : BaseDto<ProductInstanceDto, ProductInstance, int>, IValidatableObject
     {
 
-        public long Code { get; set; }
+        public string Code { get; set; }
         public string UserName { get; set; }
         public bool IsActive { get; set; }
         public int OpId { get; set; }
@@ -22,7 +22,7 @@ namespace API.Models.Tracking
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (Code < 0)
+            if (string.IsNullOrWhiteSpace(Code))
                 yield return new ValidationResult("کد نباید خالی باشد", new[] { nameof(Code) });
         }
 
