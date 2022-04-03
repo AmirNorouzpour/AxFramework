@@ -11,4 +11,10 @@
     {
         public string ConnectionId { get; set; }
     }
+
+
+    public class FBTokenDto
+    {
+        public string Token { get; set; }
+    }
 }

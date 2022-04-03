@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Xml;
 using API.Hubs;
 using API.Models;
@@ -236,6 +237,18 @@ namespace API.Controllers.v1.Basic
         }
 
 
+        [AxAuthorize(StateType = StateType.UniqueKey)]
+        [HttpPost("[action]")]
+        public async Task<ApiResult<string>> SetFBToken(FBTokenDto tokenDto, CancellationToken cancellationToken)
+        {
+            var key = Request.Headers["key"];
+            var user = await _userRepository.GetFirstAsync(x => x.UniqueKey == key, cancellationToken);
+            user.FireBaseToken = tokenDto.Token;
+            await _userRepository.UpdateAsync(user, cancellationToken);
+            return new ApiResult<string>(true, ApiResultStatusCode.Success, null, "Update Successful");
+        }
+
+
         /// <summary>
         /// SignOut user and Remove user Token from Db
         /// </summary>
@@ -419,6 +432,7 @@ namespace API.Controllers.v1.Basic
             var user = await _userRepository.GetFirstAsync(x => x.UniqueKey == key, cancellationToken);
             var isVip = user?.ExpireDateTime > DateTime.UtcNow;
             var list = _memoryCache.Get<List<AxPosition>>(CacheKeys.PositionsData);
+
             var data = list.Select(x => new AxPositionDto
             {
                 EnterPrice = isVip || x.IsFree ? Format(x.EnterPrice, symbols, x.Symbol).ToString() : "",
@@ -438,9 +452,18 @@ namespace API.Controllers.v1.Basic
                 StopMoved = isVip || x.IsFree ? x.StopMoved : null,
                 ProfitPercent = isVip || x.IsFree ? decimal.Parse(x.ProfitPercent.ToString("n2")) : 0,
                 LeverageMode = x.SuggestedLeverage,
+                MaxTargetPercent = GetMaxTargetPercent(x),
                 Result = x.Result.ToString()
             }).ToList();
             return data;
+        }
+
+        private static decimal GetMaxTargetPercent(AxPosition x)
+        {
+            var lastTp = x.TargetsList.LastOrDefault();
+            var diff = Math.Abs(lastTp - x.EnterPrice);
+            var maxTargetPercent = x.Side == PositionSide.Long ? decimal.Parse((diff * 100 / x.EnterPrice * x.Leverage).ToString("n2")) : 100 - (decimal.Parse((diff * 100 / x.EnterPrice * x.Leverage).ToString("n2")));
+            return maxTargetPercent;
         }
 
 
@@ -454,15 +477,27 @@ namespace API.Controllers.v1.Basic
             var list = _analysisMsgRepository.GetAll(x => x.Type == type).OrderByDescending(x => x.DateTime).Take(30);
             var data = list.Select(x => new AnalysisMsgDto
             {
+                Id = x.Id,
                 Title = x.Title,
                 Side = x.Side,
                 DateTime = x.DateTime.ToString("yyyy/MM/dd HH:mm"),
                 Content = x.Content,
                 Tags = x.Tags,
                 Type = x.Type.ToString(),
+                ImageLink = "http://65.108.14.168:8081/api/v1/users/GetMsgImg/" + x.Id + "/" + x.CreatorUserId,
                 Views = 0
             });
             return data.ToList();
+        }
+
+        [HttpGet("[action]/{id}/{cId}")]
+        [AxAuthorize(StateType = StateType.Ignore)]
+        public async Task<IActionResult> GetMsgImg(int id, int cid, CancellationToken cancellationToken)
+        {
+            var file = await _fileRepository.GetFirstAsync(x => x.Key == id && x.TypeName == "Analysis", cancellationToken);
+            if (file == null)
+                return NoContent();
+            return File(file.ContentBytes, file.ContentType);
         }
 
         private static decimal Format(decimal input, List<Symbol> symbols, string symbol)
@@ -490,7 +525,6 @@ namespace API.Controllers.v1.Basic
                 UserName = loginDto.Key,
                 FirstName = loginDto.Key,
                 LastName = loginDto.Key,
-
             };
             await _userRepository.AddAsync(u, cancellationToken);
             return u.Id;

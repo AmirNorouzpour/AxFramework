@@ -2,22 +2,21 @@
 
 namespace Data.Migrations
 {
-    public partial class AddAxChartIsLive : Migration
+    public partial class addFBToekn : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsLive",
-                table: "AxCharts",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.AddColumn<string>(
+                name: "FireBaseToken",
+                table: "Users",
+                nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "IsLive",
-                table: "AxCharts");
+                name: "FireBaseToken",
+                table: "Users");
         }
     }
 }

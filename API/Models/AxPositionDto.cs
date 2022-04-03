@@ -25,6 +25,7 @@ namespace API.Models
         public bool? StopMoved { get; set; }
         public string Side { get; set; }
         public string Result { get; set; }
+        public decimal MaxTargetPercent { get; set; }
     }
 
 }

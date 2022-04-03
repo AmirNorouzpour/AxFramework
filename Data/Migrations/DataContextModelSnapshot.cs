@@ -1331,6 +1331,9 @@ namespace Data.Migrations
                     b.Property<DateTime?>("ExpireDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("FireBaseToken")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
@@ -1746,8 +1749,8 @@ namespace Data.Migrations
                     b.Property<string>("Tags")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("Title")
-                        .HasColumnType("bit");
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");

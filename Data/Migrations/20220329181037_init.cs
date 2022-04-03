@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Data.Migrations
 {
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -49,6 +49,48 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AxSignals",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    Symbol = table.Column<string>(nullable: true),
+                    Side = table.Column<string>(nullable: true),
+                    DateTime = table.Column<DateTime>(nullable: false),
+                    TimeFrame = table.Column<string>(nullable: true),
+                    EnterPrice = table.Column<decimal>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AxSignals", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AxUserSettings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    SignalNotify = table.Column<bool>(nullable: false),
+                    NewsNotify = table.Column<bool>(nullable: false),
+                    AnalysisNotify = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AxUserSettings", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ConfigData",
                 columns: table => new
                 {
@@ -68,6 +110,73 @@ namespace Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ConfigData", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FileAttachmentTypes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    TypeTitle = table.Column<string>(nullable: true),
+                    IsBaseType = table.Column<bool>(nullable: false),
+                    AttachmentTypeEnum = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FileAttachmentTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Geos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    ParentId = table.Column<int>(nullable: true),
+                    Title = table.Column<string>(nullable: true),
+                    Path = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Geos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Geos_Geos_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "Geos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "HardwareDataHistories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    Cpu = table.Column<float>(nullable: false),
+                    Ram = table.Column<float>(nullable: false),
+                    NetworkIn = table.Column<float>(nullable: false),
+                    NetworkOut = table.Column<float>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HardwareDataHistories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -153,7 +262,7 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RS",
+                name: "Reports",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -174,7 +283,7 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RS", x => x.Id);
+                    table.PrimaryKey("PK_Reports", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -193,13 +302,93 @@ namespace Data.Migrations
                     IsActive = table.Column<bool>(nullable: false),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
+                    Email = table.Column<string>(nullable: true),
+                    UniqueKey = table.Column<string>(nullable: true),
                     GenderType = table.Column<int>(nullable: false),
-                    BirthDate = table.Column<DateTime>(nullable: false),
+                    BirthDate = table.Column<DateTime>(nullable: true),
+                    ExpireDateTime = table.Column<DateTime>(nullable: true),
+                    OutOfOrgAccess = table.Column<bool>(nullable: false),
                     LastLoginDate = table.Column<DateTimeOffset>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AxPositions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    AxSignalId = table.Column<int>(nullable: true),
+                    Symbol = table.Column<string>(nullable: true),
+                    EnterPrice = table.Column<decimal>(nullable: false),
+                    StopLoss = table.Column<decimal>(nullable: false),
+                    Targets = table.Column<string>(nullable: true),
+                    Max = table.Column<decimal>(nullable: false),
+                    ProfitPercent = table.Column<decimal>(nullable: false),
+                    DateTime = table.Column<DateTime>(nullable: false),
+                    TimeFrame = table.Column<string>(nullable: true),
+                    Price = table.Column<decimal>(nullable: false),
+                    Risk = table.Column<string>(nullable: true),
+                    Capital = table.Column<string>(nullable: true),
+                    Leverage = table.Column<decimal>(nullable: false),
+                    SuggestedLeverage = table.Column<string>(nullable: true),
+                    Status = table.Column<int>(nullable: false),
+                    IsFree = table.Column<bool>(nullable: false),
+                    ReachedTarget = table.Column<int>(nullable: false),
+                    StopMoved = table.Column<bool>(nullable: false),
+                    Side = table.Column<int>(nullable: false),
+                    Result = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AxPositions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AxPositions_AxSignals_AxSignalId",
+                        column: x => x.AxSignalId,
+                        principalTable: "AxSignals",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FileAttachments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    Title = table.Column<string>(nullable: true),
+                    ContentBytes = table.Column<byte[]>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    FileName = table.Column<string>(nullable: true),
+                    Extension = table.Column<string>(nullable: true),
+                    ContentType = table.Column<string>(nullable: true),
+                    Key = table.Column<int>(nullable: false),
+                    Size = table.Column<long>(nullable: false),
+                    TypeName = table.Column<string>(nullable: true),
+                    FileAttachmentTypeId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FileAttachments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FileAttachments_FileAttachmentTypes_FileAttachmentTypeId",
+                        column: x => x.FileAttachmentTypeId,
+                        principalTable: "FileAttachmentTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -213,9 +402,11 @@ namespace Data.Migrations
                     CreatorUserId = table.Column<int>(nullable: false),
                     ModifierUserId = table.Column<int>(nullable: true),
                     RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
-                    FieldId = table.Column<int>(nullable: false),
+                    ColumnType = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true),
-                    ReportId = table.Column<int>(nullable: false)
+                    ReportId = table.Column<int>(nullable: false),
+                    TargetType = table.Column<string>(nullable: true),
+                    JoinId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -260,33 +451,6 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OrderByReports",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    InsertDateTime = table.Column<DateTime>(nullable: false),
-                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
-                    CreatorUserId = table.Column<int>(nullable: false),
-                    ModifierUserId = table.Column<int>(nullable: true),
-                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
-                    OrderIndex = table.Column<int>(nullable: false),
-                    Column = table.Column<string>(nullable: true),
-                    OrderByType = table.Column<int>(nullable: false),
-                    ReportId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OrderByReports", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_OrderByReports_NewReports_ReportId",
-                        column: x => x.ReportId,
-                        principalTable: "NewReports",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AxCharts",
                 columns: table => new
                 {
@@ -303,15 +467,16 @@ namespace Data.Migrations
                     ReportId = table.Column<int>(nullable: true),
                     NextChartId = table.Column<int>(nullable: true),
                     NextChartType = table.Column<int>(nullable: true),
-                    ChartType = table.Column<int>(nullable: false)
+                    ChartType = table.Column<int>(nullable: false),
+                    IsLive = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AxCharts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AxCharts_RS_ReportId",
+                        name: "FK_AxCharts_Reports_ReportId",
                         column: x => x.ReportId,
-                        principalTable: "RS",
+                        principalTable: "Reports",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -345,9 +510,9 @@ namespace Data.Migrations
                 {
                     table.PrimaryKey("PK_AxFilters", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AxFilters_RS_ReportId",
+                        name: "FK_AxFilters_Reports_ReportId",
                         column: x => x.ReportId,
-                        principalTable: "RS",
+                        principalTable: "Reports",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -364,7 +529,7 @@ namespace Data.Migrations
                     ModifierUserId = table.Column<int>(nullable: true),
                     RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
                     Content = table.Column<string>(nullable: false),
-                    City = table.Column<string>(nullable: true),
+                    GeoId = table.Column<int>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false),
                     IsMainAddress = table.Column<bool>(nullable: false),
                     UserId = table.Column<int>(nullable: false),
@@ -375,11 +540,48 @@ namespace Data.Migrations
                 {
                     table.PrimaryKey("PK_Addresses", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Addresses_Geos_GeoId",
+                        column: x => x.GeoId,
+                        principalTable: "Geos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Addresses_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AnalysisMsgs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    Content = table.Column<string>(nullable: true),
+                    Title = table.Column<string>(nullable: true),
+                    Tags = table.Column<string>(nullable: true),
+                    Side = table.Column<string>(nullable: true),
+                    Views = table.Column<int>(nullable: false),
+                    UserId = table.Column<int>(nullable: true),
+                    DateTime = table.Column<DateTime>(nullable: false),
+                    Type = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AnalysisMsgs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AnalysisMsgs_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -445,6 +647,43 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    Title = table.Column<string>(nullable: true),
+                    Body = table.Column<string>(nullable: true),
+                    SeenDateTime = table.Column<DateTime>(nullable: true),
+                    IsSeen = table.Column<bool>(nullable: false),
+                    SenderId = table.Column<int>(nullable: false),
+                    ReceiverId = table.Column<int>(nullable: false),
+                    MessageType = table.Column<int>(nullable: false),
+                    ReplayId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Messages_Messages_ReplayId",
+                        column: x => x.ReplayId,
+                        principalTable: "Messages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Messages_Users_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Permissions",
                 columns: table => new
                 {
@@ -484,6 +723,35 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Transactions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    Title = table.Column<string>(nullable: true),
+                    Duration = table.Column<int>(nullable: false),
+                    Status = table.Column<int>(nullable: false),
+                    TransactionId = table.Column<string>(nullable: true),
+                    UserId = table.Column<int>(nullable: false),
+                    DateTime = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Transactions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Transactions_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserGroups",
                 columns: table => new
                 {
@@ -509,6 +777,36 @@ namespace Data.Migrations
                     table.ForeignKey(
                         name: "FK_UserGroups_Users_UserId",
                         column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserMessages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    Title = table.Column<string>(nullable: true),
+                    Body = table.Column<string>(nullable: true),
+                    Number = table.Column<string>(nullable: true),
+                    HaveAttachment = table.Column<bool>(nullable: false),
+                    SenderId = table.Column<int>(nullable: false),
+                    Priority = table.Column<int>(nullable: false),
+                    Confidentiality = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserMessages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserMessages_Users_SenderId",
+                        column: x => x.SenderId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -576,6 +874,32 @@ namespace Data.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrderByReports",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    OrderIndex = table.Column<int>(nullable: false),
+                    OrderByType = table.Column<int>(nullable: false),
+                    ColumnReportId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderByReports", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OrderByReports_ColumnReports_ColumnReportId",
+                        column: x => x.ColumnReportId,
+                        principalTable: "ColumnReports",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -691,6 +1015,61 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserMessageReceivers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    Title = table.Column<string>(nullable: true),
+                    ReceiverType = table.Column<int>(nullable: false),
+                    PrimaryKey = table.Column<int>(nullable: false),
+                    UserMessageId = table.Column<int>(nullable: false),
+                    IsSeen = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserMessageReceivers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserMessageReceivers_UserMessages_UserMessageId",
+                        column: x => x.UserMessageId,
+                        principalTable: "UserMessages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserConnections",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    ConnectionId = table.Column<string>(nullable: true),
+                    Ip = table.Column<string>(nullable: true),
+                    UserId = table.Column<int>(nullable: false),
+                    UserTokenId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserConnections", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserConnections_UserTokens_UserTokenId",
+                        column: x => x.UserTokenId,
+                        principalTable: "UserTokens",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AxSeries",
                 columns: table => new
                 {
@@ -784,8 +1163,18 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Addresses_GeoId",
+                table: "Addresses",
+                column: "GeoId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Addresses_UserId",
                 table: "Addresses",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AnalysisMsgs_UserId",
+                table: "AnalysisMsgs",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -809,6 +1198,11 @@ namespace Data.Migrations
                 column: "ReportId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AxPositions_AxSignalId",
+                table: "AxPositions",
+                column: "AxSignalId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AxSeries_BarChartId",
                 table: "AxSeries",
                 column: "BarChartId");
@@ -824,9 +1218,19 @@ namespace Data.Migrations
                 column: "ReportId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_FileAttachments_FileAttachmentTypeId",
+                table: "FileAttachments",
+                column: "FileAttachmentTypeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Filters_ReportId",
                 table: "Filters",
                 column: "ReportId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Geos_ParentId",
+                table: "Geos",
+                column: "ParentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Legends_BarChartId",
@@ -854,14 +1258,26 @@ namespace Data.Migrations
                 column: "ParentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Messages_ReplayId",
+                table: "Messages",
+                column: "ReplayId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_SenderId",
+                table: "Messages",
+                column: "SenderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_NumericWidgets_AxChartId",
                 table: "NumericWidgets",
                 column: "AxChartId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderByReports_ReportId",
+                name: "IX_OrderByReports_ColumnReportId",
                 table: "OrderByReports",
-                column: "ReportId");
+                column: "ColumnReportId",
+                unique: true,
+                filter: "[ColumnReportId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Permissions_GroupId",
@@ -889,6 +1305,11 @@ namespace Data.Migrations
                 column: "SeriesId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Transactions_UserId",
+                table: "Transactions",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserCharts_AxChartId",
                 table: "UserCharts",
                 column: "AxChartId");
@@ -899,6 +1320,11 @@ namespace Data.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserConnections_UserTokenId",
+                table: "UserConnections",
+                column: "UserTokenId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserGroups_GroupId",
                 table: "UserGroups",
                 column: "GroupId");
@@ -907,6 +1333,16 @@ namespace Data.Migrations
                 name: "IX_UserGroups_UserId",
                 table: "UserGroups",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserMessageReceivers_UserMessageId",
+                table: "UserMessageReceivers",
+                column: "UserMessageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserMessages_SenderId",
+                table: "UserMessages",
+                column: "SenderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserSettings_DefaultSystemId",
@@ -931,6 +1367,9 @@ namespace Data.Migrations
                 name: "Addresses");
 
             migrationBuilder.DropTable(
+                name: "AnalysisMsgs");
+
+            migrationBuilder.DropTable(
                 name: "Audits");
 
             migrationBuilder.DropTable(
@@ -940,13 +1379,22 @@ namespace Data.Migrations
                 name: "AxFilters");
 
             migrationBuilder.DropTable(
-                name: "ColumnReports");
+                name: "AxPositions");
+
+            migrationBuilder.DropTable(
+                name: "AxUserSettings");
 
             migrationBuilder.DropTable(
                 name: "ConfigData");
 
             migrationBuilder.DropTable(
+                name: "FileAttachments");
+
+            migrationBuilder.DropTable(
                 name: "Filters");
+
+            migrationBuilder.DropTable(
+                name: "HardwareDataHistories");
 
             migrationBuilder.DropTable(
                 name: "Legends");
@@ -956,6 +1404,9 @@ namespace Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Logs");
+
+            migrationBuilder.DropTable(
+                name: "Messages");
 
             migrationBuilder.DropTable(
                 name: "NumericWidgets");
@@ -970,40 +1421,64 @@ namespace Data.Migrations
                 name: "PieCharts");
 
             migrationBuilder.DropTable(
+                name: "Transactions");
+
+            migrationBuilder.DropTable(
                 name: "UserCharts");
+
+            migrationBuilder.DropTable(
+                name: "UserConnections");
 
             migrationBuilder.DropTable(
                 name: "UserGroups");
 
             migrationBuilder.DropTable(
+                name: "UserMessageReceivers");
+
+            migrationBuilder.DropTable(
                 name: "UserSettings");
 
             migrationBuilder.DropTable(
-                name: "UserTokens");
+                name: "Geos");
+
+            migrationBuilder.DropTable(
+                name: "AxSignals");
+
+            migrationBuilder.DropTable(
+                name: "FileAttachmentTypes");
 
             migrationBuilder.DropTable(
                 name: "LineCharts");
 
             migrationBuilder.DropTable(
-                name: "NewReports");
+                name: "ColumnReports");
 
             migrationBuilder.DropTable(
                 name: "AxSeries");
 
             migrationBuilder.DropTable(
+                name: "UserTokens");
+
+            migrationBuilder.DropTable(
                 name: "AxGroups");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "UserMessages");
+
+            migrationBuilder.DropTable(
+                name: "NewReports");
 
             migrationBuilder.DropTable(
                 name: "BarCharts");
 
             migrationBuilder.DropTable(
+                name: "Users");
+
+            migrationBuilder.DropTable(
                 name: "AxCharts");
 
             migrationBuilder.DropTable(
-                name: "RS");
+                name: "Reports");
 
             migrationBuilder.DropTable(
                 name: "Menus");

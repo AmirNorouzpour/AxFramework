@@ -17,5 +17,7 @@ namespace API.Models
         public User User { get; set; }
         public string DateTime { get; set; }
         public string Type { get; set; }
+        public int Id { get; set; }
+        public string ImageLink { get; set; }
     }
 }
