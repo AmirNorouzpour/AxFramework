@@ -122,7 +122,7 @@ namespace API.Controllers.v1.Tracking
 
             if (dto.MachineId == 0)
             {
-                return new ApiResult<ProductInstanceDto>(true, ApiResultStatusCode.Success, new ProductInstanceDto { MachineId = machine.Id, IsMachine = true }, "ابتدا بارکد ماشین را اسکن کنید");
+                return new ApiResult<ProductInstanceDto>(false, ApiResultStatusCode.LogicError, null, "ابتدا بارکد ماشین را اسکن کنید");
             }
 
             if (personel == null)
