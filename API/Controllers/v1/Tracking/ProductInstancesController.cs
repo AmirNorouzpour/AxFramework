@@ -120,14 +120,17 @@ namespace API.Controllers.v1.Tracking
                 return new ApiResult<ProductInstanceDto>(true, ApiResultStatusCode.Success, new ProductInstanceDto { MachineId = machine.Id, IsMachine = true }, " ماشین انتخاب شد");
             }
 
+            if (dto.MachineId == 0)
+                return new ApiResult<ProductInstanceDto>(false, ApiResultStatusCode.LogicError, null, "ابتدا بارکد ماشین را اسکن کنید");
+
             if (personel == null)
                 return new ApiResult<ProductInstanceDto>(false, ApiResultStatusCode.LogicError, null, "برای کاربری پرسنل تعریف نشده است");
+
             var p = _repository.GetFirst(x => x.Code == dto.Code);
             if (p == null)
             {
                 dto.IsActive = true;
                 dto.PersonnelId = personel.Id;
-                dto.ProductLineId = 2;
                 var productInstance = dto.ToEntity();
                 await _repository.AddAsync(productInstance, cancellationToken);
 

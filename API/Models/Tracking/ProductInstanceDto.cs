@@ -17,7 +17,6 @@ namespace API.Models.Tracking
         public bool IsMachine { get; set; }
         public int MachineId { get; set; }
         public int PersonnelId { get; set; }
-        public int ProductLineId { get; set; }
         public bool IsEnter { get; set; }
         public DateTime InsertDateTime { get; set; }
 
