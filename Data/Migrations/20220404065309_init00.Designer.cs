@@ -4,14 +4,16 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220404065309_init00")]
+    partial class init00
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1954,9 +1956,6 @@ namespace Data.Migrations
                     b.Property<DateTime>("InsertDateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("MachineId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("ModifiedDateTime")
                         .HasColumnType("datetime2");
 
@@ -1964,6 +1963,9 @@ namespace Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Month")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OpId")
                         .HasColumnType("int");
 
                     b.Property<int>("PersonnelId")
@@ -1988,7 +1990,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MachineId");
+                    b.HasIndex("OpId");
 
                     b.HasIndex("PersonnelId");
 
@@ -2403,10 +2405,11 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Entities.Tracking.ProductInstanceHistory", b =>
                 {
-                    b.HasOne("Entities.Tracking.Machine", "Machine")
+                    b.HasOne("Entities.Tracking.OperationStation", "OperationStation")
                         .WithMany()
-                        .HasForeignKey("MachineId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("OpId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("Entities.Tracking.Personnel", "Personnel")
                         .WithMany()

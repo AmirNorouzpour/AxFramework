@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +10,6 @@ using Common;
 using Common.Exception;
 using Common.Utilities;
 using Data.Repositories;
-using Entities.Framework;
 using Entities.Framework.AxCharts;
 using Entities.Framework.Reports;
 using Entities.Tracking;
@@ -31,12 +29,13 @@ namespace API.Controllers.v1.Tracking
         private readonly IBaseRepository<ProductInstance> _repository;
         private readonly IBaseRepository<Personnel> _personnelRepository;
         private readonly IBaseRepository<ProductInstanceHistory> _productInstanceHistoryRepository;
+        private readonly IBaseRepository<Machine> _machineRepository;
         private readonly IUserConnectionService _userConnectionService;
         private readonly IBaseRepository<BarChart> _barChartRepository;
         private readonly IHubContext<AxHub> _hub;
 
 
-        public ProductInstancesController(IBaseRepository<ProductInstance> repository, IBaseRepository<Personnel> personnelRepository, IBaseRepository<ProductInstanceHistory> productInstanceHistoryRepository, IUserConnectionService userConnectionService, IBaseRepository<BarChart> barChartRepository, IHubContext<AxHub> hub)
+        public ProductInstancesController(IBaseRepository<ProductInstance> repository, IBaseRepository<Personnel> personnelRepository, IBaseRepository<ProductInstanceHistory> productInstanceHistoryRepository, IUserConnectionService userConnectionService, IBaseRepository<BarChart> barChartRepository, IHubContext<AxHub> hub, IBaseRepository<Machine> machineRepository)
         {
             _repository = repository;
             _personnelRepository = personnelRepository;
@@ -44,6 +43,7 @@ namespace API.Controllers.v1.Tracking
             _userConnectionService = userConnectionService;
             _barChartRepository = barChartRepository;
             _hub = hub;
+            _machineRepository = machineRepository;
         }
 
         [HttpGet]
@@ -112,7 +112,13 @@ namespace API.Controllers.v1.Tracking
         [AxAuthorize(StateType = StateType.OnlyToken, Order = 1, AxOp = AxOp.ProductInstanceInsert)]
         public virtual async Task<ApiResult<ProductInstanceDto>> AddHistory(ProductInstanceDto dto, CancellationToken cancellationToken)
         {
-            var personel = _personnelRepository.GetFirst(x => x.UserId == UserId);
+            var personel = await _personnelRepository.GetFirstAsync(x => x.UserId == UserId, cancellationToken);
+
+            var machine = await _machineRepository.GetFirstAsync(x => x.Code == dto.Code, cancellationToken);
+            if (machine != null)
+            {
+                return new ApiResult<ProductInstanceDto>(true, ApiResultStatusCode.Success, new ProductInstanceDto { MachineId = machine.Id, IsMachine = true }, " ماشین انتخاب شد");
+            }
 
             if (personel == null)
                 return new ApiResult<ProductInstanceDto>(false, ApiResultStatusCode.LogicError, null, "برای کاربری پرسنل تعریف نشده است");
@@ -128,7 +134,7 @@ namespace API.Controllers.v1.Tracking
                 var pih = new ProductInstanceHistory
                 {
                     UserId = UserId,
-                    OpId = dto.OpId,
+                    MachineId = dto.MachineId,
                     CreatorUserId = UserId,
                     InsertDateTime = DateTime.Now,
                     PersonnelId = personel.Id,
@@ -141,13 +147,13 @@ namespace API.Controllers.v1.Tracking
             else
             {
 
-                var row = _productInstanceHistoryRepository.GetFirst(x => x.OpId == dto.OpId && x.ProductInstance.Code == dto.Code && x.EnterTime != null);
-                var hasExit = _productInstanceHistoryRepository.GetFirst(x => x.OpId == dto.OpId && x.ProductInstance.Code == dto.Code && x.ExitTime != null);
+                var row = await _productInstanceHistoryRepository.GetFirstAsync(x => x.MachineId == dto.MachineId && x.ProductInstance.Code == dto.Code && x.EnterTime != null, cancellationToken);
+                //var hasExit = await _productInstanceHistoryRepository.GetFirstAsync(x => x.MachineId == dto.MachineId && x.ProductInstance.Code == dto.Code && x.ExitTime != null, cancellationToken);
 
                 if (row != null && dto.IsEnter)
                     return new ApiResult<ProductInstanceDto>(false, ApiResultStatusCode.LogicError, null, "ورود این قطعه قبلا در ایستگاه ثبت شده است");
-                if (hasExit != null && !dto.IsEnter)
-                    return new ApiResult<ProductInstanceDto>(false, ApiResultStatusCode.LogicError, null, "خروج این قطعه از ایستگاه قبلا ثبت شده است");
+                //if (hasExit != null && !dto.IsEnter)
+                //    return new ApiResult<ProductInstanceDto>(false, ApiResultStatusCode.LogicError, null, "خروج این قطعه از ایستگاه قبلا ثبت شده است");
 
                 if (!dto.IsEnter && row == null)
                 {
@@ -157,7 +163,7 @@ namespace API.Controllers.v1.Tracking
                 var pih = new ProductInstanceHistory
                 {
                     UserId = UserId,
-                    OpId = dto.OpId,
+                    MachineId = dto.MachineId,
                     CreatorUserId = UserId,
                     InsertDateTime = DateTime.Now,
                     PersonnelId = personel.Id,
@@ -186,14 +192,14 @@ namespace API.Controllers.v1.Tracking
 
                 var pid = 2;
                 var data = _productInstanceHistoryRepository
-                    .GetAll(x => !x.ExitTime.HasValue && x.OperationStation.ProductLineId == pid)
-                    .Include(x => x.OperationStation).ToList().GroupBy(x => x.OpId)
+                    .GetAll(x => !x.ExitTime.HasValue && x.Machine.OperationStation.ProductLineId == pid)
+                    .Include(x => x.Machine).ThenInclude(x => x.OperationStation).ToList().GroupBy(x => x.Machine.OperationStationId)
                     .Select(x => new { Count = x.Count(), x.Key, Data = x })
                     .ToList();
-                var a = data.OrderBy(x => x.Data.FirstOrDefault()?.OperationStation.Order).Select(x => x.Count)
+                var a = data.OrderBy(x => x.Data.FirstOrDefault()?.Machine.OperationStation.Order).Select(x => x.Count)
                     .ToList();
                 barChart.Series.Add(new AxSeriesDto { Data = a, Name = "تعداد محصول" });
-                barChart.Labels = data.Select(x => x.Data.FirstOrDefault()?.OperationStation.Name).ToList();
+                barChart.Labels = data.Select(x => x.Data.FirstOrDefault()?.Machine.OperationStation.Name).ToList();
             }
 
             await _hub.Clients.Clients(connections).SendAsync("UpdateChart", barChart, cancellationToken);

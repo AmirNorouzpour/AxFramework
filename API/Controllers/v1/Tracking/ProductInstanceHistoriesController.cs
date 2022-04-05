@@ -25,7 +25,7 @@ namespace API.Controllers.v1.Tracking
         }
 
         [HttpGet]
-        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.ProductInstanceHistoryList)]
+        [AxAuthorize(StateType = StateType.Ignore, AxOp = AxOp.ProductInstanceHistoryList)]
         public virtual ApiResult<IQueryable<ProductInstanceHistoryDto>> Get([FromQuery] DataRequest request, string code = null, long? op = null, string userIds = null, DateTime? date = null)
         {
 
@@ -43,7 +43,7 @@ namespace API.Controllers.v1.Tracking
                 data0 = data0.Where(x => x.InsertDateTime.Date == date.Value.Date);
 
             if (op.HasValue)
-                data0 = data0.Where(x => x.OpId == op);
+                data0 = data0.Where(x => x.Machine.OperationStationId == op);
 
             var data = data0.OrderBy(request.Sort, request.SortType).OrderByDescending(x => x.Id).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<ProductInstanceHistoryDto>();
             Response.Headers.Add("X-Pagination", data0.Count().ToString());
@@ -68,7 +68,7 @@ namespace API.Controllers.v1.Tracking
                 data0 = data0.Where(x => x.InsertDateTime.Date == date.Value.Date);
 
             if (op.HasValue)
-                data0 = data0.Where(x => x.OpId == op);
+                data0 = data0.Where(x => x.Machine.OperationStationId == op);
 
             var data = data0.OrderByDescending(x => x.Id).ProjectTo<ProductInstanceHistoryDto>();
 
@@ -83,9 +83,5 @@ namespace API.Controllers.v1.Tracking
             });
 
         }
-
-
-
-
     }
 }

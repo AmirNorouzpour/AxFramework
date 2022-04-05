@@ -14,7 +14,8 @@ namespace API.Models.Tracking
         public string Code { get; set; }
         public string UserName { get; set; }
         public bool IsActive { get; set; }
-        public int OpId { get; set; }
+        public bool IsMachine { get; set; }
+        public int MachineId { get; set; }
         public int PersonnelId { get; set; }
         public int ProductLineId { get; set; }
         public bool IsEnter { get; set; }

@@ -45,7 +45,7 @@ namespace Data
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ProductInstanceHistory>()
-                .HasOne(c => c.OperationStation)
+                .HasOne(c => c.Machine)
                 .WithMany()
                 .OnDelete(DeleteBehavior.NoAction);
         }

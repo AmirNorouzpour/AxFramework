@@ -18,7 +18,6 @@ namespace API.Models.Tracking
         public string Username { get; set; }
         public int PersonnelId { get; set; }
         public string PersonnelName { get; set; }
-        public int OpId { get; set; }
         public string OpName { get; set; }
         public int Day { get; set; }
         public int Month { get; set; }
@@ -28,7 +27,7 @@ namespace API.Models.Tracking
         public string EnterType { get; set; }
         public DateTime EnterTime { get; set; }
         public DateTime? ExitTime { get; set; }
-        public long Code { get; set; }
+        public string Code { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -54,7 +53,7 @@ namespace API.Models.Tracking
             );
             mapping.ForMember(
                 dest => dest.OpName,
-                config => config.MapFrom(src => $"{src.OperationStation.Name} ")
+                config => config.MapFrom(src => $"{src.Machine.OperationStation.Name} ")
             );
             mapping.ForMember(
                 dest => dest.ShiftName,

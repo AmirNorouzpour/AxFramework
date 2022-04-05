@@ -16,9 +16,9 @@ namespace Entities.Tracking
         public int PersonnelId { get; set; }
         [ForeignKey("PersonnelId")]
         public Personnel Personnel { get; set; }
-        public int OpId { get; set; }
-        [ForeignKey("OpId")]
-        public OperationStation OperationStation { get; set; }
+        public int? MachineId { get; set; }
+        [ForeignKey("MachineId")]
+        public Machine Machine { get; set; }
         public int Day { get; set; }
         public int Month { get; set; }
         public int Year { get; set; }

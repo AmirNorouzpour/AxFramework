@@ -126,12 +126,12 @@ namespace API.Controllers.v1.Chart
                     if (chart.Id == 17)
                     {
                         var pid = 2;
-                        var data = _productInstanceRepository.GetAll(x => !x.ExitTime.HasValue && x.OperationStation.ProductLineId == pid).Include(x => x.OperationStation).ToList().GroupBy(x => x.OpId)
+                        var data = _productInstanceRepository.GetAll(x => !x.ExitTime.HasValue && x.Machine.OperationStation.ProductLineId == pid).Include(x => x.Machine.OperationStation).ToList().GroupBy(x => x.Machine.OperationStationId)
                              .Select(x => new { Count = x.Count(), x.Key, Data = x })
                              .ToList();
-                        var a = data.OrderBy(x => x.Data.FirstOrDefault()?.OperationStation.Order).Select(x => x.Count).ToList();
+                        var a = data.OrderBy(x => x.Data.FirstOrDefault()?.Machine.OperationStation.Order).Select(x => x.Count).ToList();
                         barChart.Series.Add(new AxSeriesDto { Data = a, Name = "تعداد محصول" });
-                        barChart.Labels = data.Select(x => x.Data.FirstOrDefault()?.OperationStation.Name).ToList();
+                        barChart.Labels = data.Select(x => x.Data.FirstOrDefault()?.Machine.OperationStation.Name).ToList();
                         return Ok(barChart);
                     }
                     else
