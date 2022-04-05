@@ -12,9 +12,6 @@ namespace Entities.Tracking
         public int PersonnelId { get; set; }
         [ForeignKey("PersonnelId")]
         public Personnel Personnel { get; set; }
-        public int OpId { get; set; }
-        [ForeignKey("OpId")]
-        public OperationStation OperationStation { get; set; }
         public int ProductLineId { get; set; }
         [ForeignKey("ProductLineId")]
         public ProductLine ProductLine { get; set; }
