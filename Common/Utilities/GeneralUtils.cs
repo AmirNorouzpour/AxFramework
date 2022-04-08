@@ -57,7 +57,7 @@ namespace Common.Utilities
                     if (cols.Contains(property.Name) || cols == null)
                         workSheet.Cells[1, i].Value = property.Name;
                 }
-            }
+            }   
 
             if (data != null)
                 for (var i = 1; i <= data.Count; i++)
