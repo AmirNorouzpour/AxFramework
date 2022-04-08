@@ -257,7 +257,7 @@ namespace API.Controllers.v1.Tracking
 
         [HttpGet("[action]")]
         [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.ProductInstanceList)]
-        public virtual ApiResult<IQueryable<ProductInstanceDto>> GetDamagedList([FromQuery] DataRequest request, string code = null, string userIds = null, DateTime? date = null)
+        public virtual ApiResult<IQueryable<DamagedDto>> GetDamagedList([FromQuery] DataRequest request, string code = null, string userIds = null, DateTime? date = null)
         {
             //var predicate = request.GetFilter<ProductInstance>();
             var data0 = _damagedRepository.GetAll().Include(x => x.ProductInstance).AsQueryable();
