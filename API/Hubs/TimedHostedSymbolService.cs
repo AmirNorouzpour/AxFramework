@@ -45,7 +45,7 @@ namespace API.Hubs
             {
                 var symbol0 = symbols.FirstOrDefault(x => x.Title == symbol);
                 var data = await _client.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, KlineInterval.OneHour, null, null,
-               50, stoppingToken);
+               201, stoppingToken);
                 var axbs = new AxBs
                 {
                     Candles = new List<AxBsCandle>(),
