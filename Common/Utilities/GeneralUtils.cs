@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
@@ -34,7 +34,7 @@ namespace Common.Utilities
             };
         }
 
-         public static MemoryStream ExportToExcel<T>(List<T> data, string filename = null, string cols = null)
+        public static MemoryStream ExportToExcel<T>(List<T> data, string cols = null)
         {
             if (data?.Count == 0)
                 return new MemoryStream();
@@ -43,25 +43,42 @@ namespace Common.Utilities
             using var pck = new ExcelPackage();
             var workSheet = pck.Workbook.Worksheets.Add("Sheet1");
             workSheet.DefaultRowHeight = 12;
-            for (var i = 1; i <= properties.Length; i++)
+            var split = cols?.Split(",");
+            var colCount = cols != null ? split.Length : properties.Length;
+            for (var i = 1; i <= colCount; i++)
             {
-                var property = properties[i - 1];
-                if (cols != null && cols.Contains(property.Name) || cols == null)
-                    workSheet.Cells[1, i].Value = property.Name;
-            }
-
-            for (var i = 1; i <= data.Count; i++)
-            {
-                var row = data[i - 1];
-                for (var j = 0; j < properties.Length; j++)
+                if (split != null)
                 {
-                    var property = properties[j];
-                    if (cols != null && cols.Contains(property.Name) || cols == null)
-                        workSheet.Cells[i + 1, j + 1].Value = property.GetValue(row);
+                    var name = split[i - 1];
+                    var property = properties.FirstOrDefault(x => x.Name == name);
+                    if (property == null)
+                        continue;
 
+                    if (cols.Contains(property.Name) || cols == null)
+                        workSheet.Cells[1, i].Value = property.Name;
                 }
             }
-            using (var range = workSheet.Cells[1, 1, 1, properties.Length])
+
+            if (data != null)
+                for (var i = 1; i <= data.Count; i++)
+                {
+                    var row = data[i - 1];
+                    for (var j = 0; j < colCount; j++)
+                    {
+                        if (split != null)
+                        {
+                            var name = split[j];
+                            var property = properties.FirstOrDefault(x => x.Name == name);
+                            if (property == null)
+                                continue;
+
+                            if (cols.Contains(property.Name) || cols == null)
+                                workSheet.Cells[i + 1, j + 1].Value = property.GetValue(row);
+                        }
+                    }
+                }
+
+            using (var range = workSheet.Cells[1, 1, 1, colCount])
             {
                 range.Style.Fill.PatternType = ExcelFillStyle.Solid;
                 range.Style.Fill.BackgroundColor.SetColor(Color.LightGray);
@@ -74,7 +91,7 @@ namespace Common.Utilities
                 range.Style.ReadingOrder = ExcelReadingOrder.LeftToRight;
             }
 
-            using (var range = workSheet.Cells[2, 1, data.Count + 1, properties.Length])
+            using (var range = workSheet.Cells[2, 1, data.Count + 1, colCount])
             {
                 range.Style.Fill.PatternType = ExcelFillStyle.Solid;
                 range.Style.Fill.BackgroundColor.SetColor(Color.White);
