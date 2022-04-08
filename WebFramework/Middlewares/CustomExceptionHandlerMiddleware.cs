@@ -63,7 +63,7 @@ namespace WebFramework.Middlewares
                     theEvent.Level = LogLevel.Info;
 
                 _logger.Log(theEvent);
-                if (_env.IsDevelopment())
+                //if (_env.IsDevelopment())
                 {
                     var dic = new Dictionary<string, string>
                     {
@@ -81,9 +81,9 @@ namespace WebFramework.Middlewares
 
                     message = JsonConvert.SerializeObject(dic);
                 }
-                else
+                //else
                 {
-                    message = exception.Message;
+                    //message = exception.Message;
                 }
 
                 await WriteToResponseAsync();
@@ -122,7 +122,7 @@ namespace WebFramework.Middlewares
                     _logger.Error(theEvent);
                 else
                     _logger.Info(theEvent);
-                if (_env.IsDevelopment())
+                //if (_env.IsDevelopment())
                 {
                     var dic = new Dictionary<string, string>
                     {
