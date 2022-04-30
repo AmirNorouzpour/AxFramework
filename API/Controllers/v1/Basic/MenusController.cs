@@ -77,22 +77,22 @@ namespace API.Controllers.v1.Basic
             return Ok(output);
         }
 
-        [HttpGet("[action]/{systemId}")]
-        [AxAuthorize(StateType = StateType.OnlyToken)]
-        public virtual ApiResult<dynamic> GetDashboardCharts(int systemId)
-        {
-            var charts = _userChartsRepository.GetAll(x => x.UserId == UserId && x.Active && x.AxChart.Active && x.AxChart.SystemId == systemId).Include(x => x.AxChart).OrderBy(x => x.OrderIndex).Select(x => new
-            {
-                x.AxChart.Title,
-                x.AxChart.ReportId,
-                x.AxChart.ChartType,
-                x.Width,
-                x.Height,
-                x.OrderIndex,
-                x.AxChart.Id,
-                x.AxChart.IsLive
-            });
-            return Ok(charts);
-        }
+        //[HttpGet("[action]/{systemId}")]
+        //[AxAuthorize(StateType = StateType.OnlyToken)]
+        //public virtual ApiResult<dynamic> GetDashboardCharts(int systemId)
+        //{
+        //    var charts = _userChartsRepository.GetAll(x => x.UserId == UserId && x.Active && x.AxChart.Active && x.AxChart.SystemId == systemId).Include(x => x.AxChart).OrderBy(x => x.OrderIndex).Select(x => new
+        //    {
+        //        x.AxChart.Title,
+        //        x.AxChart.ReportId,
+        //        x.AxChart.ChartType,
+        //        x.Width,
+        //        x.Height,
+        //        x.OrderIndex,
+        //        x.AxChart.Id,
+        //        x.AxChart.IsLive
+        //    });
+        //    return Ok(charts);
+        //}
     }
 }

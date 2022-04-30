@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
-using System.Xml;
 using API.Hubs;
 using API.Models;
 using AutoMapper.QueryableExtensions;
@@ -18,9 +13,6 @@ using Common.Utilities;
 using Data.Repositories;
 using Data.Repositories.UserRepositories;
 using Entities.Framework;
-using Entities.Framework.AxCharts;
-using Entities.Framework.Reports;
-using Entities.MasterSignal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -55,18 +47,16 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<UserMessage> _userMessageRepository;
         private readonly IUserConnectionService _userConnectionService;
         private readonly IBaseRepository<UserConnection> _userConnectionRepository;
-        private readonly IBaseRepository<AxChart> _chartRepository;
-        private readonly IBaseRepository<BarChart> _barChartRepository;
-        private readonly IBaseRepository<NumericWidget> _numberWidgetRepository;
         private readonly IHubContext<AxHub> _hub;
         private readonly IBaseRepository<AxGroup> _groupRepository;
-        private readonly IBaseRepository<AxSignal> _signalsRepository;
-        private readonly IBaseRepository<AnalysisMsg> _analysisMsgRepository;
+
 
         /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IBaseRepository<LoginLog> loginlogRepository, IMemoryCache memoryCache,
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
-            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub, IBaseRepository<AxGroup> groupRepository, IBaseRepository<AxSignal> signalsRepository, IBaseRepository<AnalysisMsg> analysisMsgRepository)
+            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileRepository, IBaseRepository<UserMessage> userMessageRepository,
+            IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository,
+            IHubContext<AxHub> hub, IBaseRepository<AxGroup> groupRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -79,14 +69,9 @@ namespace API.Controllers.v1.Basic
             _userMessageRepository = userMessageRepository;
             _userConnectionService = userConnectionService;
             _userConnectionRepository = userConnectionRepository;
-            _chartRepository = chartRepository;
-            _barChartRepository = barChartRepository;
-            _numberWidgetRepository = numberWidgetRepository;
             _memoryCache = memoryCache;
             _hub = hub;
             _groupRepository = groupRepository;
-            _signalsRepository = signalsRepository;
-            _analysisMsgRepository = analysisMsgRepository;
         }
 
         /// <summary>
@@ -266,18 +251,6 @@ namespace API.Controllers.v1.Basic
                 throw new UnauthorizedAccessException("کاربر یافت نشد");
 
             await _userTokenRepository.DeleteAsync(userToken, cancellationToken);
-
-            var connections = _userConnectionService.GetActiveConnections();
-            var chart = await _chartRepository.GetAll(x => x.Id == 9).Include(x => x.Report).FirstOrDefaultAsync(cancellationToken);
-            var numericWidget = _numberWidgetRepository.GetAll(x => x.AxChartId == 9).ProjectTo<NumericWidgetDto>().FirstOrDefault();
-            if (chart != null && numericWidget != null)
-            {
-                var data = chart.Report.Execute();
-                numericWidget.Data = (int)data;
-                numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
-            }
-            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", numericWidget, cancellationToken);
-
             return Ok();
         }
 
@@ -329,40 +302,6 @@ namespace API.Controllers.v1.Basic
             return userInfo;
         }
 
-        [HttpGet("[action]")]
-        [AxAuthorize(StateType = StateType.OnlyToken)]
-        public async Task<ApiResult<IQueryable<AxSignal>>> GetSignals()
-        {
-            var user = _userRepository.GetFirst(x => x.Id == UserId);
-            if (user.UserName != "admin")
-                return null;
-            var signals = _signalsRepository.GetAll().OrderByDescending(x => x.InsertDateTime);
-            return Ok(signals);
-        }
-
-        //[HttpGet("[action]")]
-        //[AxAuthorize(StateType = StateType.Ignore)]
-        //public async Task<FileResult> GetSymbolChart(CancellationToken cancellationToken)
-        //{
-        //    var bmp = new Bitmap(1800, 600);
-        //    var blackPen = new Pen(Color.LimeGreen, 3);
-
-        //    var list = new List<Point>();
-        //    for (var i = 1; i <= 50; i++)
-        //    {
-        //        Thread.Sleep(10);
-        //        list.Add(new Point(i * 75, new Random((int)DateTime.Now.Ticks).Next(30, 550)));
-        //    }
-
-
-        //    using (var graphics = Graphics.FromImage(bmp))
-        //    {
-        //        graphics.DrawCurve(blackPen, list.ToArray());
-        //        pictureBox1.Image = bmp;
-        //        bmp.Save(@"F:\test.png");
-        //    }
-        //}
-
 
 
         [HttpGet("[action]")]
@@ -371,7 +310,6 @@ namespace API.Controllers.v1.Basic
         {
             var user = await _userRepository.GetFirstAsync(x => x.Id == UserId, cancellationToken);
             var key = Request.Headers["key"];
-            var data = _memoryCache.Get<GlobalResult>(CacheKeys.MainData);
 
             var userInfo = new UserMainData
             {
@@ -380,7 +318,6 @@ namespace API.Controllers.v1.Basic
                 UserDisplayName = user?.FullName,
                 Email = user?.Email,
                 ExpireDateTime = user?.ExpireDateTime,
-                FGIndex = data
             };
             //userInfo.UnReedMsgCount = _userMessageRepository.Count(x => x.Receivers.Any(r => r.PrimaryKey == UserId && !r.IsSeen));
 
@@ -412,123 +349,6 @@ namespace API.Controllers.v1.Basic
             }
 
             return userInfo;
-        }
-
-        [HttpGet("[action]")]
-        [AxAuthorize(StateType = StateType.UniqueKey)]
-        public ApiResult<List<Item>> GetNews(CancellationToken cancellationToken)
-        {
-            var data = _memoryCache.Get<List<Item>>(CacheKeys.NewsData);
-            return data;
-        }
-
-
-        [HttpGet("[action]")]
-        [AxAuthorize(StateType = StateType.UniqueKey)]
-        public async Task<ApiResult<List<AxPositionDto>>> GetPositions(CancellationToken cancellationToken)
-        {
-            var symbols = _memoryCache.Get<List<Symbol>>(CacheKeys.SymbolsData);
-            var key = Request.Headers["key"].ToString();
-            var user = await _userRepository.GetFirstAsync(x => x.UniqueKey == key, cancellationToken);
-            var isVip = user?.ExpireDateTime > DateTime.UtcNow;
-            var list = _memoryCache.Get<List<AxPosition>>(CacheKeys.PositionsData);
-
-            var data = list.Select(x => new AxPositionDto
-            {
-                EnterPrice = isVip || x.IsFree ? Format(x.EnterPrice, symbols, x.Symbol).ToString() : "",
-                StopLoss = isVip || x.IsFree ? Format(x.StopLoss, symbols, x.Symbol).ToString() : "",
-                Id = x.Id,
-                Targets = isVip || x.IsFree ? x.Targets : "",
-                Symbol = x.Symbol.Replace("USDT", "/USDT"),
-                Side = isVip || x.IsFree ? x.Side.ToString() : "",
-                Status = x.Status.ToString(),
-                Leverage = isVip || x.IsFree ? x.Leverage : 0,
-                Capital = isVip || x.IsFree ? x.Capital : "",
-                Risk = x.Risk,
-                Price = Format(x.Price, symbols, x.Symbol),
-                DateTime = isVip || x.IsFree ? x.DateTime.ToString("yyyy/MM/dd HH:mm") : "",
-                IsFree = x.IsFree,
-                Max = isVip || x.IsFree ? decimal.Parse(x.Max.ToString("n2")) : 0,
-                StopMoved = isVip || x.IsFree ? x.StopMoved : null,
-                ProfitPercent = isVip || x.IsFree ? decimal.Parse(x.ProfitPercent.ToString("n2")) : 0,
-                LeverageMode = x.SuggestedLeverage,
-                MaxTargetPercent = GetMaxTargetPercent(x),
-                Result = x.Result.ToString()
-            }).ToList();
-            return data;
-        }
-
-        private static decimal GetMaxTargetPercent(AxPosition x)
-        {
-            var lastTp = x.TargetsList.LastOrDefault();
-            var diff = Math.Abs(lastTp - x.EnterPrice);
-            var maxTargetPercent = x.Side == PositionSide.Long ? decimal.Parse((diff * 100 / x.EnterPrice * x.Leverage).ToString("n2")) : 100 - (decimal.Parse((diff * 100 / x.EnterPrice * x.Leverage).ToString("n2")));
-            return maxTargetPercent;
-        }
-
-
-        [HttpGet("[action]/{type}")]
-        [AxAuthorize(StateType = StateType.UniqueKey)]
-        public async Task<ApiResult<List<AnalysisMsgDto>>> GetMsg(AnalysisMsgType type, CancellationToken cancellationToken)
-        {
-            var key = Request.Headers["key"].ToString();
-            var user = await _userRepository.GetFirstAsync(x => x.UniqueKey == key, cancellationToken);
-            var isVip = user?.ExpireDateTime > DateTime.UtcNow;
-            var list = _analysisMsgRepository.GetAll(x => x.Type == type).OrderByDescending(x => x.DateTime).Take(30);
-            var data = list.Select(x => new AnalysisMsgDto
-            {
-                Id = x.Id,
-                Title = x.Title,
-                Side = x.Side,
-                DateTime = x.DateTime.ToString("yyyy/MM/dd HH:mm"),
-                Content = x.Content,
-                Tags = x.Tags,
-                Type = x.Type.ToString(),
-                ImageLink = "http://65.108.14.168:8081/api/v1/users/GetMsgImg/" + x.Id + "/" + x.CreatorUserId,
-                Views = 0
-            });
-            return data.ToList();
-        }
-
-        [HttpGet("[action]/{id}/{cId}")]
-        [AxAuthorize(StateType = StateType.Ignore)]
-        public async Task<IActionResult> GetMsgImg(int id, int cid, CancellationToken cancellationToken)
-        {
-            var file = await _fileRepository.GetFirstAsync(x => x.Key == id && x.TypeName == "Analysis", cancellationToken);
-            if (file == null)
-                return NoContent();
-            return File(file.ContentBytes, file.ContentType);
-        }
-
-        private static decimal Format(decimal input, List<Symbol> symbols, string symbol)
-        {
-            var s = symbols.FirstOrDefault(x => x.Title == symbol);
-            if (s == null)
-                return input;
-            var format = "n" + s.Decimals;
-            return decimal.Parse(input.ToString(format));
-        }
-
-        [AxAuthorize(StateType = StateType.Ignore)]
-        [HttpPost("[action]")]
-        public async Task<ApiResult<int>> SetUnique(LoginDto loginDto, CancellationToken cancellationToken)
-        {
-            var user = await _userRepository.GetFirstAsync(x => x.UniqueKey == loginDto.Key, cancellationToken);
-            if (user != null)
-                return user.Id;
-
-            var u = new User
-            {
-                InsertDateTime = DateTime.Now,
-                UniqueKey = loginDto.Key,
-                IsActive = true,
-                UserName = loginDto.Key,
-                FirstName = loginDto.Key,
-                LastName = loginDto.Key,
-            };
-            await _userRepository.AddAsync(u, cancellationToken);
-            return u.Id;
-
         }
 
         [HttpPost("[action]")]
@@ -582,9 +402,8 @@ namespace API.Controllers.v1.Basic
             if (user.UserName != "admin")
                 return null;
 
-            var predicate = request.GetFilter<User>();
-            var users = _userRepository.GetAll(predicate).OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<UserSelectDto>();
-            Response.Headers.Add("X-Pagination", _userRepository.Count(predicate).ToString());
+            var users = _userRepository.GetAll().OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<UserSelectDto>();
+            Response.Headers.Add("X-Pagination", _userRepository.Count().ToString());
             return Ok(users);
         }
 
@@ -703,17 +522,16 @@ namespace API.Controllers.v1.Basic
             return resultDto;
         }
 
-        [HttpGet("[action]")]
-        [AxAuthorize(StateType = StateType.Ignore)]
-        public virtual ApiResult<IEnumerable<UserGroupDto>> GetUsersAndGroups([FromQuery] DataRequest request)
-        {
-            var filter = request.Filters.FirstOrDefault()?.Value1;
-            filter ??= "";
-            var users = _userRepository.GetAll(x => x.IsActive && x.UserName.Contains(filter) || x.FirstName.Contains(filter) || x.FirstName.Contains(filter)).ToList().Select(x => new UserGroupDto { Id = x.Id, Type = UgType.User, Name = x.FullName, GroupLabel = "کاربر" });
-            var groups = _groupRepository.GetAll(x => x.GroupName.Contains(filter)).ToList().Select(x => new UserGroupDto { Id = x.Id, Type = UgType.Group, Name = x.GroupName, GroupLabel = "گروه کاربر" });
-            var result = users.Union(groups);
-            return Ok(result);
-        }
+        //[HttpGet("[action]")]
+        //[AxAuthorize(StateType = StateType.Ignore)]
+        //public virtual ApiResult<IEnumerable<UserGroupDto>> GetUsersAndGroups([FromQuery] DataRequest request)
+        //{
+        //    filter ??= "";
+        //    var users = _userRepository.GetAll(x => x.IsActive && x.UserName.Contains(filter) || x.FirstName.Contains(filter) || x.FirstName.Contains(filter)).ToList().Select(x => new UserGroupDto { Id = x.Id, Type = UgType.User, Name = x.FullName, GroupLabel = "کاربر" });
+        //    var groups = _groupRepository.GetAll(x => x.GroupName.Contains(filter)).ToList().Select(x => new UserGroupDto { Id = x.Id, Type = UgType.Group, Name = x.GroupName, GroupLabel = "گروه کاربر" });
+        //    var result = users.Union(groups);
+        //    return Ok(result);
+        //}
 
 
     }

@@ -11,7 +11,6 @@ using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
 using WebFramework.Filters;
 using Common.Utilities;
-using Entities.Framework.Reports;
 
 namespace API.Controllers.v1.Basic
 {
@@ -31,8 +30,7 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.ChangeTracker, ShowInMenu = true)]
         public virtual ApiResult<IQueryable<AuditDto>> Get([FromQuery] DataRequest request)
         {
-            var predicate = request.GetFilter<Audit>();
-            var data = _repository.GetAll(predicate).OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<AuditDto>();
+            var data = _repository.GetAll().OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<AuditDto>();
             return Ok(data);
         }
 
@@ -40,9 +38,8 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.Authorized, Order = 0, AxOp = AxOp.LogList, ShowInMenu = true)]
         public virtual ApiResult<IQueryable<LogDto>> GetLogs([FromQuery] DataRequest request)
         {
-            var predicate = request.GetFilter<Log>();
-            var data = _logRepository.GetAll(predicate).OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<LogDto>();
-            Response.Headers.Add("X-Pagination", _logRepository.Count(predicate).ToString());
+            var data = _logRepository.GetAll().OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<LogDto>();
+            Response.Headers.Add("X-Pagination", _logRepository.Count().ToString());
             return Ok(data);
         }
 

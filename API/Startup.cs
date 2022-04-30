@@ -60,9 +60,6 @@ namespace API
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
             services.AddHostedService<TimedAuditLogHostedService>();
-            services.AddHostedService<TimedHostedService>();
-            services.AddHostedService<SocketHostedService>();
-            services.AddHostedService<TimedHostedSymbolService>();
             services.AddSwagger();
             services.AddSignalR();
             services.Configure<ApiBehaviorOptions>(options =>

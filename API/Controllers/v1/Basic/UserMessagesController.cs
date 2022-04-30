@@ -5,7 +5,6 @@ using Common;
 using Common.Utilities;
 using Data.Repositories;
 using Entities.Framework;
-using Entities.Framework.Reports;
 using Microsoft.AspNetCore.Mvc;
 using WebFramework.Api;
 using WebFramework.Filters;
@@ -26,8 +25,7 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.OnlyToken)]
         public virtual ApiResult<IQueryable<UserMessageDto>> Get([FromQuery] DataRequest request)
         {
-            var predicate = request.GetFilter<UserMessage>();
-            var data = _repository.GetAll(predicate).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).OrderBy(request.Sort, request.SortType).ProjectTo<UserMessageDto>();
+            var data = _repository.GetAll().Skip(request.PageIndex * request.PageSize).Take(request.PageSize).OrderBy(request.Sort, request.SortType).ProjectTo<UserMessageDto>();
             return Ok(data);
         }
 
