@@ -436,7 +436,23 @@ namespace API.Controllers.v1.Basic
             return Ok(result);
         }
 
-     
+
+        [HttpPost("[action]")]
+        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.UserUpdate, Order = 3)]
+        public virtual async Task<ApiResult<string>> ChangePassword(UserDto dto, CancellationToken cancellationToken)
+        {
+            var user = await _userRepository.GetFirstAsync(x => x.Id == dto.Id, cancellationToken);
+            if (user == null)
+                return "کاربری یافت نشد";
+
+            if (dto.Password != dto.RePassword)
+                return "رمز عبور و تکرار آن برابر نیستند";
+
+            user.Password = SecurityHelper.GetSha256Hash(dto.Password);
+            await _userRepository.UpdateAsync(user, cancellationToken);
+            return "رمز عبور تغییر کرد";
+        }
+
     }
 
 }
