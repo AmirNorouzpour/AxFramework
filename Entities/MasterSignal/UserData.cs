@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using Binance.Net.Enums;
 using Entities.Framework;
 using FluentValidation;
@@ -25,6 +26,7 @@ namespace Entities.MasterSignal
         public string Symbol { get; set; }
         public decimal EnterAveragePrice { get; set; }
         public decimal ExitAveragePrice { get; set; }
+        [NotMapped]
         public decimal TempProfit { get; set; }
         public decimal Quantity { get; set; }
         public OrderSide Side { get; set; }
@@ -32,6 +34,7 @@ namespace Entities.MasterSignal
         public decimal Profit { get; set; }
         public decimal ProfitPercent { get; set; }
         public decimal Commission { get; set; }
+        [NotMapped]
         public bool InProgress { get; set; }
         public DateTime EnterTime { get; set; }
         public DateTime ExitTime { get; set; }

@@ -23,11 +23,13 @@ namespace API.Controllers.v1.Basic
     {
         private readonly IBaseRepository<ConfigData> _repository;
         private readonly IBaseRepository<UserData> _userDataRepository;
+        private readonly IBaseRepository<AxPositionLog> _axPositionLogRepository;
 
-        public GeneralController(IBaseRepository<ConfigData> repository, IBaseRepository<UserData> userDataRepository)
+        public GeneralController(IBaseRepository<ConfigData> repository, IBaseRepository<UserData> userDataRepository, IBaseRepository<AxPositionLog> axPositionLogRepository)
         {
             _repository = repository;
             _userDataRepository = userDataRepository;
+            _axPositionLogRepository = axPositionLogRepository;
         }
 
 
@@ -122,14 +124,23 @@ namespace API.Controllers.v1.Basic
 
         [HttpGet("[action]")]
         [AxAuthorize(StateType = StateType.Ignore)]
-        public async Task<IActionResult> GetHistory(CancellationToken cancellationToken)
+        public async Task<ApiResult<dynamic>> GetHistory()
         {
-            var data = await _repository.GetFirstAsync(x => x.Active, cancellationToken);
+            var now = DateTime.Now;
+            var thisMonth = new DateTime(now.Year, now.Month, 1);
+            thisMonth = thisMonth.AddMonths(-11);
+            var data = _axPositionLogRepository.GetAll(x => x.ExitTime >= thisMonth).ToList().GroupBy(x => new { x.ExitTime.Year, x.ExitTime.Month }).ToList();
 
-            if (data == null)
-                return NotFound();
+            var thisMonthData = data.Select(x => new
+            {
+                Month = new DateTime(x.Key.Year, x.Key.Month, 1).ToString("MMMM"),
+                SumOfProfitPercent = x.Sum(t => t.ProfitPercent),
+                SumOfProfit = x.Sum(t => t.Profit),
+                Trades = x
 
-            return File(data.OrganizationLogo.ToArray(), GeneralUtils.GetContentType("a.png"));
+            });
+
+            return Ok(thisMonthData);
         }
 
 
