@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Models;
 using Binance.Net.Clients;
-using Binance.Net.Enums;
 using Binance.Net.Objects.Models.Futures;
 using Common;
 using Common.Utilities;
@@ -119,6 +118,18 @@ namespace API.Controllers.v1.Basic
             var apiResult = new ApiResult<PositionModel>(true, ApiResultStatusCode.Success, result);
             return apiResult;
 
+        }
+
+        [HttpGet("[action]")]
+        [AxAuthorize(StateType = StateType.Ignore)]
+        public async Task<IActionResult> GetHistory(CancellationToken cancellationToken)
+        {
+            var data = await _repository.GetFirstAsync(x => x.Active, cancellationToken);
+
+            if (data == null)
+                return NotFound();
+
+            return File(data.OrganizationLogo.ToArray(), GeneralUtils.GetContentType("a.png"));
         }
 
 
