@@ -128,7 +128,7 @@ namespace API.Controllers.v1.Basic
         {
             var now = DateTime.Now;
             var thisMonth = new DateTime(now.Year, now.Month, 1);
-            thisMonth = thisMonth.AddMonths(-11);
+            thisMonth = thisMonth.AddMonths(-100);
             var data = _axPositionLogRepository.GetAll(x => x.ExitTime >= thisMonth).ToList().GroupBy(x => new { x.ExitTime.Year, x.ExitTime.Month }).ToList();
 
             var thisMonthData = data.Select(x => new
