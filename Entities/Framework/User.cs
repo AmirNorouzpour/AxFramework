@@ -12,30 +12,30 @@ namespace Entities.Framework
         public string Password { get; set; }
         public bool IsActive { get; set; } = true;
         public string FirstName { get; set; }
-        public string FireBaseToken { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
-        public string UniqueKey { get; set; }
-        public GenderType GenderType { get; set; }
-        public DateTime? BirthDate { get; set; }
+        [ForeignKey("SubscriptionId")]
+        public int? SubscriptionId { get; set; }
+        public  Subscription Subscription { get; set; }
+        public LoginType LoginType { get; set; }
         public DateTime? ExpireDateTime { get; set; }
-        public bool OutOfOrgAccess { get; set; }
-        public DateTimeOffset? LastLoginDate { get; set; }
+        public DateTime LastLoginDate { get; set; }
         public UserSetting UserSettings { get; set; }
         [NotMapped]
         public string FullName => FirstName + " " + LastName;
     }
 
-    public enum GenderType
+    public enum LoginType
     {
-        Female = 0,
-        Male = 1,
-        None = 2
+        Email,
+        Google
     }
+
 
     public class UserValidator : AbstractValidator<User>
     {
-        public UserValidator() {
+        public UserValidator()
+        {
             RuleFor(x => x.Id).NotNull();
         }
     }
