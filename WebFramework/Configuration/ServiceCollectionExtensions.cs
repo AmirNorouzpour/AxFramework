@@ -26,9 +26,8 @@ namespace WebFramework.Configuration
         {
             services.AddDbContext<DataContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("SqlServer"))
-                    .ConfigureWarnings(warning => warning.Throw(RelationalEventId.QueryClientEvaluationWarning));
-            }, ServiceLifetime.Scoped);
+                options.UseSqlServer(configuration.GetConnectionString("SqlServer") ?? throw new InvalidOperationException("ConnectionString is Null"));
+            });
         }
 
         //public static void AddMinimalMvc(this IServiceCollection services)

@@ -33,7 +33,6 @@ namespace API.Controllers.v1.Basic
 
             if (data == null)
                 return NotFound();
-
             return File(data.OrganizationLogo.ToArray(), GeneralUtils.GetContentType("a.png"));
         }
 
