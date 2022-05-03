@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Common;
 using Common.Exception;
 using Common.Utilities;
 using Entities.Framework;
@@ -25,7 +24,7 @@ namespace Data.Repositories.UserRepositories
 
         public Task UpdateLastLoginDateAsync(User user, CancellationToken cancellationToken)
         {
-            user.LastLoginDate = DateTimeOffset.Now;
+            user.LastLoginDate = DateTime.Now;
             return UpdateAsync(user, cancellationToken);
         }
 

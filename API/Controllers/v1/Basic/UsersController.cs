@@ -357,16 +357,12 @@ namespace API.Controllers.v1.Basic
         {
             var key = Request.Headers["key"];
             var user = await _userRepository.GetFirstAsync(x => x.UniqueKey == key.ToString(), cancellationToken);
-            if (!user.BirthDate.HasValue)
-            {
-                user.UserName = dto?.UserName;
-                user.Email = dto?.UserName;
-                user.FirstName = dto?.FirstName;
-                user.LastName = dto?.LastName;
-                user.Password = SecurityHelper.GetSha256Hash(dto?.Password);
-                user.BirthDate = DateTime.Now;
-                await _userRepository.UpdateAsync(user, cancellationToken);
-            }
+            user.UserName = dto?.UserName;
+            user.Email = dto?.UserName;
+            user.FirstName = dto?.FirstName;
+            user.LastName = dto?.LastName;
+            user.Password = SecurityHelper.GetSha256Hash(dto?.Password);
+            await _userRepository.UpdateAsync(user, cancellationToken);
             return user.Id;
         }
 

@@ -13,6 +13,8 @@ namespace Entities.Framework
         public bool IsActive { get; set; } = true;
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string UniqueKey { get; set; }
+        public string FireBaseToken { get; set; }
         public string Email { get; set; }
         [ForeignKey("SubscriptionId")]
         public int? SubscriptionId { get; set; }

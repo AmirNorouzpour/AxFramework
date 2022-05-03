@@ -19,7 +19,6 @@ namespace API.Models
         public string Email { get; set; }
         public string LastLoginDate { get; set; }
         public bool IsActive { get; set; }
-        public GenderType GenderType { get; set; }
         public DateTime? BirthDate { get; set; }
         public DateTime? ExpireDateTime { get; set; }
         public bool OutOfOrgAccess { get; set; }
