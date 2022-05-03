@@ -11,7 +11,7 @@ namespace Entities.Framework
         public int Pyramiding { get; set; }
         public OrderSizeType OrderSizeType { get; set; }
         public decimal Commission { get; set; }
-        public List<Indicator> IndicatorList { get; set; }
+        public List<StrategyIndicator> IndicatorList { get; set; }
     }
 
     public enum OrderSizeType
