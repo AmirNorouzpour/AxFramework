@@ -19,6 +19,8 @@ namespace API.Models.Tracking
         public int PersonnelId { get; set; }
         public string PersonnelName { get; set; }
         public string OpName { get; set; }
+        public string MachineName { get; set; }
+        public string ProductLineName { get; set; }
         public int Day { get; set; }
         public int Month { get; set; }
         public int Year { get; set; }
@@ -58,6 +60,14 @@ namespace API.Models.Tracking
             mapping.ForMember(
                 dest => dest.ShiftName,
                 config => config.MapFrom(src => $"{src.Shift.Name} ")
+            );
+            mapping.ForMember(
+                dest => dest.MachineName,
+                config => config.MapFrom(src => $"{src.Machine.Name} ")
+            );
+            mapping.ForMember(
+                dest => dest.ProductLineName,
+                config => config.MapFrom(src => $"{src.Machine.OperationStation.ProductLine.Name} ")
             );
         }
 

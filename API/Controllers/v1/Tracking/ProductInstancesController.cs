@@ -50,7 +50,7 @@ namespace API.Controllers.v1.Tracking
 
         [HttpGet]
         [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.ProductInstanceList)]
-        public virtual ApiResult<IQueryable<ProductInstanceDto>> Get([FromQuery] DataRequest request, string code = null, string userIds = null, DateTime? date = null)
+        public virtual ApiResult<IQueryable<ProductInstanceDto>> Get([FromQuery] DataRequest request, string code = null, string userIds = null, DateTime? date1 = null, DateTime? date2 = null)
         {
             //var predicate = request.GetFilter<ProductInstance>();
             var data0 = _repository.GetAll();
@@ -62,8 +62,12 @@ namespace API.Controllers.v1.Tracking
                 var userIdsArray = userIds.Split(',').Select(int.Parse);
                 data0 = data0.Where(x => userIdsArray.Contains(x.Personnel.UserId));
             }
-            if (date.HasValue)
-                data0 = data0.Where(x => x.InsertDateTime.Date == date.Value.Date);
+
+            if (date1.HasValue)
+                data0 = data0.Where(x => x.InsertDateTime.Date >= date1.Value.Date);
+
+            if (date2.HasValue)
+                data0 = data0.Where(x => x.InsertDateTime.Date <= date2.Value.Date);
 
             var data = data0.OrderBy(request.Sort, request.SortType).OrderByDescending(x => x.Id).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<ProductInstanceDto>();
             Response.Headers.Add("X-Pagination", data0.Count().ToString());

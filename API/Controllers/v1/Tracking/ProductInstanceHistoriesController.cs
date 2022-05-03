@@ -26,7 +26,7 @@ namespace API.Controllers.v1.Tracking
 
         [HttpGet]
         [AxAuthorize(StateType = StateType.Ignore, AxOp = AxOp.ProductInstanceHistoryList)]
-        public virtual ApiResult<IQueryable<ProductInstanceHistoryDto>> Get([FromQuery] DataRequest request, string code = null, long? op = null, string userIds = null, DateTime? date = null)
+        public virtual ApiResult<IQueryable<ProductInstanceHistoryDto>> Get([FromQuery] DataRequest request, string code = null, long? op = null, long? line = null, long? machine = null, string userIds = null, DateTime? date1 = null, DateTime? date2 = null)
         {
 
             var data0 = _repository.GetAll();
@@ -39,11 +39,19 @@ namespace API.Controllers.v1.Tracking
                 data0 = data0.Where(x => userIdsArray.Contains(x.ProductInstance.Personnel.UserId));
             }
 
-            if (date.HasValue)
-                data0 = data0.Where(x => x.InsertDateTime.Date == date.Value.Date);
+            if (date1.HasValue)
+                data0 = data0.Where(x => x.InsertDateTime.Date >= date1.Value.Date);
+
+            if (date2.HasValue)
+                data0 = data0.Where(x => x.InsertDateTime.Date <= date2.Value.Date);
+
 
             if (op.HasValue)
                 data0 = data0.Where(x => x.Machine.OperationStationId == op);
+            if (line.HasValue)
+                data0 = data0.Where(x => x.Machine.OperationStation.ProductLineId == line);
+            if (machine.HasValue)
+                data0 = data0.Where(x => x.MachineId == machine);
 
             var data = data0.OrderBy(request.Sort, request.SortType).OrderByDescending(x => x.Id).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<ProductInstanceHistoryDto>();
             Response.Headers.Add("X-Pagination", data0.Count().ToString());
@@ -52,7 +60,7 @@ namespace API.Controllers.v1.Tracking
 
         [HttpGet("ExportToXlsx")]
         [AxAuthorize(StateType = StateType.Ignore, AxOp = AxOp.ProductInstanceHistoryList)]
-        public Task<FileContentResult> ExportToXlsx(string code = null, long? op = null, string userIds = null, DateTime? date = null)
+        public Task<FileContentResult> ExportToXlsx(string code = null, long? op = null, string userIds = null, DateTime? date1 = null, DateTime? date2 = null)
         {
             var data0 = _repository.GetAll();
             if (!string.IsNullOrWhiteSpace(code))
@@ -64,8 +72,11 @@ namespace API.Controllers.v1.Tracking
                 data0 = data0.Where(x => userIdsArray.Contains(x.ProductInstance.Personnel.UserId));
             }
 
-            if (date.HasValue)
-                data0 = data0.Where(x => x.InsertDateTime.Date == date.Value.Date);
+            if (date1.HasValue)
+                data0 = data0.Where(x => x.InsertDateTime.Date >= date1.Value.Date);
+
+            if (date2.HasValue)
+                data0 = data0.Where(x => x.InsertDateTime.Date <= date2.Value.Date);
 
             if (op.HasValue)
                 data0 = data0.Where(x => x.Machine.OperationStationId == op);

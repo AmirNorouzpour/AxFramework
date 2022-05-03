@@ -26,9 +26,11 @@ namespace WebFramework.Configuration
         {
             services.AddDbContext<DataContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("SqlServer"))
-                    .ConfigureWarnings(warning => warning.Throw(RelationalEventId.QueryClientEvaluationWarning));
-            }, ServiceLifetime.Scoped);
+                options.UseSqlServer(configuration.GetConnectionString("SqlServer"), builder =>
+                {
+                    builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+                }).ConfigureWarnings(warning => warning.Throw(RelationalEventId.QueryClientEvaluationWarning));
+            });
         }
 
         //public static void AddMinimalMvc(this IServiceCollection services)

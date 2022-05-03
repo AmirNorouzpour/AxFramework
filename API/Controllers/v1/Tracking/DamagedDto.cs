@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using API.Models.Tracking;
 using AutoMapper;
 using Entities.Tracking;
 using WebFramework.Api;
