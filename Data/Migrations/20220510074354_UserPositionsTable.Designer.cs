@@ -4,14 +4,16 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220510074354_UserPositionsTable")]
+    partial class UserPositionsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2065,12 +2067,6 @@ namespace Data.Migrations
                     b.Property<int>("CreatorUserId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("EnterTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ExitTime")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime>("InsertDateTime")
                         .HasColumnType("datetime2");
 
@@ -2090,9 +2086,6 @@ namespace Data.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Result")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Result2")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("RowVersion")

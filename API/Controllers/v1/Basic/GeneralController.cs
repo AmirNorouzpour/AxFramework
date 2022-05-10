@@ -12,6 +12,7 @@ using CryptoExchange.Net.Authentication;
 using Data.Repositories;
 using Entities.Framework;
 using Entities.MasterSignal;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebFramework.Api;
 using WebFramework.Filters;
@@ -45,40 +46,46 @@ namespace API.Controllers.v1.Basic
             return File(data.OrganizationLogo.ToArray(), GeneralUtils.GetContentType("a.png"));
         }
 
-        //[AxAuthorize(StateType = StateType.Ignore)]
-        //[HttpPost("[action]")]
-        //public async Task<ApiResult<UserData>> AddApiUser(UserDataDto userDataDto, CancellationToken cancellationToken)
-        //{
-        //    var userData = await _userDataRepository.GetFirstAsync(x => x.MobileNumber == userDataDto.MobileNumber, cancellationToken);
-        //    if (userData != null)
-        //        return new ApiResult<UserData>(true, ApiResultStatusCode.Success, userData, "اکانت قبلا ثبت شده است");
+        [AxAuthorize(StateType = StateType.Ignore)]
+        [HttpPost("[action]")]
+        public async Task<ApiResult<UserData>> AddApiUser(UserDataDto userDataDto, CancellationToken cancellationToken)
+        {
+            var ip = HttpContext.Connection.RemoteIpAddress;
+            //if (ip.ToString() != "2.186.122.127" || ip.ToString() != "65.108.14.168")
+            //    return new ApiResult<UserData>(false, ApiResultStatusCode.UnAuthorized, null, "UnAuthorized IP");
 
-        //    var client = new BinanceClient();
-        //    client.SetApiCredentials(new ApiCredentials(userDataDto.ApiKey, userDataDto.SecretKey));
+            var userData = await _userDataRepository.GetFirstAsync(x => x.MobileNumber == userDataDto.MobileNumber, cancellationToken);
+            if (userData != null)
+                return new ApiResult<UserData>(true, ApiResultStatusCode.Success, userData, "اکانت قبلا ثبت شده است");
 
-        //    var res = await client.UsdFuturesApi.Account.GetBalancesAsync(ct: cancellationToken);
-        //    if (res.Error?.Message != null)
-        //        return new ApiResult<UserData>(true, ApiResultStatusCode.LogicError,null, res.Error.Message);
-        //    var balance = res.Data.FirstOrDefault(x => x.Asset == @"USDT")?.WalletBalance;
+            var client = new BinanceClient();
+            client.SetApiCredentials(new ApiCredentials(userDataDto.ApiKey, userDataDto.SecretKey));
 
-        //    if (balance == null)
-        //        return new ApiResult<UserData>(true, ApiResultStatusCode.LogicError, null, "موجودی به تتر در اکنت فیوچرز یافت نشد");
+            var res = await client.UsdFuturesApi.Account.GetBalancesAsync(ct: cancellationToken);
+            if (res.Error?.Message != null)
+                return new ApiResult<UserData>(true, ApiResultStatusCode.LogicError, null, res.Error.Message);
+            var balance = res.Data.FirstOrDefault(x => x.Asset == @"USDT")?.WalletBalance;
+
+            if (balance == null)
+                return new ApiResult<UserData>(true, ApiResultStatusCode.LogicError, null, "موجودی به تتر در اکنت فیوچرز یافت نشد");
 
 
-        //    var u = new UserData
-        //    {
-        //        ExpireDate = DateTime.Now.AddDays(30),
-        //        ApiKey = userDataDto.ApiKey,
-        //        MobileNumber = userDataDto.MobileNumber,
-        //        PhrasePassword = userDataDto.PhrasePassword,
-        //        SecretKey = userDataDto.SecretKey,
-        //        InitBalance = balance.Value,
-        //        Balance = 0
-        //    };
-        //    await _userDataRepository.AddAsync(u, cancellationToken);
-        //    return u;
+            var u = new UserData
+            {
+                ExpireDate = DateTime.Now.AddDays(30),
+                ApiKey = userDataDto.ApiKey,
+                MobileNumber = userDataDto.MobileNumber,
+                //PhrasePassword = userDataDto.PhrasePassword,
+                SecretKey = userDataDto.SecretKey,
+                InitBalance = balance.Value,
+                Balance = balance.Value,
+                IsActive = true,
+                IsAdmin = false
+            };
+            await _userDataRepository.AddAsync(u, cancellationToken);
+            return u;
 
-        //}
+        }
 
         [AxAuthorize(StateType = StateType.Ignore)]
         [HttpPost("[action]")]

@@ -9,6 +9,6 @@ namespace API.Models
         public string MobileNumber { get; set; }
         public string ApiKey { get; set; }
         public string SecretKey { get; set; }
-        public string PhrasePassword { get; set; }
+        //public string PhrasePassword { get; set; }
     }
 }

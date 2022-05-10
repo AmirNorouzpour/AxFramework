@@ -15,6 +15,8 @@ namespace Entities.MasterSignal
         public DateTime ExpireDate { get; set; }
         public decimal InitBalance { get; set; }
         public decimal Balance { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsAdmin { get; set; }
     }
 
     public class UserDataValidator : AbstractValidator<UserData>
@@ -24,6 +26,7 @@ namespace Entities.MasterSignal
     public class AxPositionLog : BaseEntity
     {
         public string Symbol { get; set; }
+        public long TradeId { get; set; }
         public decimal EnterAveragePrice { get; set; }
         public decimal? ExitAveragePrice { get; set; }
         [NotMapped]
@@ -41,6 +44,20 @@ namespace Entities.MasterSignal
     }
     public class AxPositionLogValidator : AbstractValidator<AxPositionLog>
     {
+    }
+
+    public class UserAxPositionLog : BaseEntity
+    {
+        public string MobileNumber { get; set; }
+        public string Symbol { get; set; }
+        public string Result { get; set; }
+        public string Result2 { get; set; }
+        public decimal Quantity { get; set; }
+        public OrderSide Side { get; set; }
+        public bool IsSuccess { get; set; }
+        public DateTime EnterTime { get; set; }
+        public DateTime? ExitTime { get; set; }
+
     }
 
 }

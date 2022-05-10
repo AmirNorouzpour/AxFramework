@@ -4,14 +4,16 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220510072950_addFiledsToUserData")]
+    partial class addFiledsToUserData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2053,62 +2055,6 @@ namespace Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Transactions");
-                });
-
-            modelBuilder.Entity("Entities.MasterSignal.UserAxPositionLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("CreatorUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("EnterTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ExitTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("InsertDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsSuccess")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("MobileNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifierUserId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Result")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Result2")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("Side")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Symbol")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UserAxPositionLogs");
                 });
 
             modelBuilder.Entity("Entities.MasterSignal.UserData", b =>
