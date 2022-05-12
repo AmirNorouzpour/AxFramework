@@ -31,12 +31,13 @@ namespace API.Controllers.v1.Tracking
         private readonly IBaseRepository<ProductInstanceHistory> _productInstanceHistoryRepository;
         private readonly IBaseRepository<Machine> _machineRepository;
         private readonly IBaseRepository<Damaged> _damagedRepository;
+        private readonly IBaseRepository<Stop> _stopRepository;
         private readonly IUserConnectionService _userConnectionService;
         private readonly IBaseRepository<BarChart> _barChartRepository;
         private readonly IHubContext<AxHub> _hub;
 
 
-        public ProductInstancesController(IBaseRepository<ProductInstance> repository, IBaseRepository<Personnel> personnelRepository, IBaseRepository<ProductInstanceHistory> productInstanceHistoryRepository, IUserConnectionService userConnectionService, IBaseRepository<BarChart> barChartRepository, IHubContext<AxHub> hub, IBaseRepository<Machine> machineRepository, IBaseRepository<Damaged> damagedRepository)
+        public ProductInstancesController(IBaseRepository<ProductInstance> repository, IBaseRepository<Personnel> personnelRepository, IBaseRepository<ProductInstanceHistory> productInstanceHistoryRepository, IUserConnectionService userConnectionService, IBaseRepository<BarChart> barChartRepository, IHubContext<AxHub> hub, IBaseRepository<Machine> machineRepository, IBaseRepository<Damaged> damagedRepository, IBaseRepository<Stop> stopRepository)
         {
             _repository = repository;
             _personnelRepository = personnelRepository;
@@ -46,6 +47,7 @@ namespace API.Controllers.v1.Tracking
             _hub = hub;
             _machineRepository = machineRepository;
             _damagedRepository = damagedRepository;
+            _stopRepository = stopRepository;
         }
 
         [HttpGet]
@@ -246,7 +248,8 @@ namespace API.Controllers.v1.Tracking
                 InsertDateTime = DateTime.Now,
                 PersonnelId = personel.Id,
                 DateTime = DateTime.Now,
-                ProductInstanceId = p.Id
+                ProductInstanceId = p.Id,
+                DamageCode = dto.UserName
             };
 
             var damagedOld = await _damagedRepository.GetFirstAsync(x => x.ProductInstanceId == p.Id, cancellationToken);
@@ -264,7 +267,7 @@ namespace API.Controllers.v1.Tracking
         public virtual ApiResult<IQueryable<DamagedDto>> GetDamagedList([FromQuery] DataRequest request, string code = null, string userIds = null, DateTime? date = null)
         {
             //var predicate = request.GetFilter<ProductInstance>();
-            var data0 = _damagedRepository.GetAll().Include(x => x.ProductInstance).AsQueryable();
+            var data0 = _damagedRepository.GetAll().Include(x => x.ProductInstance).Include(x => x.Personnel.User).AsQueryable();
             if (!string.IsNullOrWhiteSpace(code))
                 data0 = data0.Where(x => x.ProductInstance.Code == code);
 
@@ -281,6 +284,57 @@ namespace API.Controllers.v1.Tracking
             Response.Headers.Add("X-Pagination", data0.Count().ToString());
             return Ok(data);
         }
+
+        [HttpGet("[action]")]
+        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.ProductInstanceList)]
+        public virtual ApiResult<IQueryable<DamagedDto>> GetStopList([FromQuery] DataRequest request, string code = null, int? machineId = null, DateTime? date = null)
+        {
+            //var predicate = request.GetFilter<ProductInstance>();
+            var data0 = _stopRepository.GetAll().Include(x => x.Machine).AsQueryable();
+            if (!string.IsNullOrWhiteSpace(code))
+                data0 = data0.Where(x => x.Code == code);
+
+            if (machineId.HasValue)
+                data0 = data0.Where(x => x.MachineId == machineId.Value);
+
+            if (date.HasValue)
+                data0 = data0.Where(x => x.InsertDateTime.Date == date.Value.Date);
+
+            var data = data0.OrderBy(request.Sort, request.SortType).OrderByDescending(x => x.Id).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<DamagedDto>();
+            Response.Headers.Add("X-Pagination", data0.Count().ToString());
+            return Ok(data);
+        }
+
+        [HttpPost("[action]")]
+        [AxAuthorize(StateType = StateType.OnlyToken, Order = 1, AxOp = AxOp.ProductInstanceInsert)]
+        public virtual async Task<ApiResult<StopDto>> AddStop(StopDto dto, CancellationToken cancellationToken)
+        {
+            var personel = await _personnelRepository.GetFirstAsync(x => x.UserId == UserId, cancellationToken);
+
+            if (personel == null)
+                return new ApiResult<StopDto>(false, ApiResultStatusCode.LogicError, null, "برای کاربری پرسنل تعریف نشده است");
+
+
+            var p = await _stopRepository.GetFirstAsync(x => x.Code == dto.Code, cancellationToken);
+            if (p == null)
+            {
+                return new ApiResult<StopDto>(false, ApiResultStatusCode.LogicError, null, "این محصول هنوز وارد چرخه تولید نشده است");
+            }
+
+            var stop = new Stop
+            {
+                CreatorUserId = UserId,
+                InsertDateTime = DateTime.Now,
+                MachineId = 0,
+                Code = dto.Code
+            };
+
+
+            await _stopRepository.AddAsync(stop, cancellationToken);
+
+            return new ApiResult<StopDto>(true, ApiResultStatusCode.Success, null);
+        }
+
 
     }
 }

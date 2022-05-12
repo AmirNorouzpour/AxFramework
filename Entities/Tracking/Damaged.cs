@@ -14,6 +14,7 @@ namespace Entities.Tracking
         [ForeignKey("PersonnelId")]
         public Personnel Personnel { get; set; }
         public DateTime DateTime { get; set; }
+        public string DamageCode { get; set; }
     }
 
     public class DamagedValidator : AbstractValidator<Damaged>
