@@ -287,7 +287,7 @@ namespace API.Controllers.v1.Tracking
 
         [HttpGet("[action]")]
         [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.ProductInstanceList)]
-        public virtual ApiResult<IQueryable<DamagedDto>> GetStopList([FromQuery] DataRequest request, string code = null, int? machineId = null, DateTime? date = null)
+        public virtual ApiResult<IQueryable<StopDto>> GetStopList([FromQuery] DataRequest request, string code = null, int? machineId = null, DateTime? date = null)
         {
             //var predicate = request.GetFilter<ProductInstance>();
             var data0 = _stopRepository.GetAll().Include(x => x.Machine).AsQueryable();
@@ -300,7 +300,7 @@ namespace API.Controllers.v1.Tracking
             if (date.HasValue)
                 data0 = data0.Where(x => x.InsertDateTime.Date == date.Value.Date);
 
-            var data = data0.OrderBy(request.Sort, request.SortType).OrderByDescending(x => x.Id).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<DamagedDto>();
+            var data = data0.OrderBy(request.Sort, request.SortType).OrderByDescending(x => x.Id).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<StopDto>();
             Response.Headers.Add("X-Pagination", data0.Count().ToString());
             return Ok(data);
         }
@@ -328,7 +328,6 @@ namespace API.Controllers.v1.Tracking
                 MachineId = 0,
                 Code = dto.Code
             };
-
 
             await _stopRepository.AddAsync(stop, cancellationToken);
 

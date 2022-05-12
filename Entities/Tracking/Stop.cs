@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Entities.Framework;
+using FluentValidation;
 
 namespace Entities.Tracking
 {
@@ -10,7 +12,15 @@ namespace Entities.Tracking
         public Machine Machine { get; set; }
         public string Code { get; set; }
         public string Description { get; set; }
+        ICollection<StopDetail> StopDetails { get; set; }
 
+    }
+
+    public class StopValidator : AbstractValidator<Stop>
+    {
+        public StopValidator()
+        {
+        }
     }
 
     public class StopDetail : BaseEntity
@@ -22,6 +32,13 @@ namespace Entities.Tracking
         [ForeignKey("PersonnelId")]
         public Personnel Personnel { get; set; }
 
+    }
+
+    public class StopDetailValidator : AbstractValidator<StopDetail>
+    {
+        public StopDetailValidator()
+        {
+        }
     }
 
     public enum StopDetailType
