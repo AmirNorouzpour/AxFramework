@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Entities.Tracking;
@@ -13,8 +14,8 @@ namespace API.Models.Tracking
         public string Code { get; set; }
         public string LastStatus { get; set; }
         public int Step { get; set; }
-        public bool Description { get; set; }
-        public string InsertDateTime { get; set; }
+        public string Description { get; set; }
+        public DateTime InsertDateTime { get; set; }
         public ICollection<StopDetail> StopDetails { get; set; }
         public override void CustomMappings(IMappingExpression<Stop, StopDto> mapping)
         {

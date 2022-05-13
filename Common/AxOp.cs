@@ -180,5 +180,8 @@
         DamagedListInsert,
         [AxDisplay("حذف", "02", DamagedList)]
         DamagedListDelete,
+        //=====================
+        [AxDisplay("لیست توقفات", "04", TrackingInfo)]
+        StopList,
     }
 }

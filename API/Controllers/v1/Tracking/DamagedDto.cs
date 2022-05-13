@@ -17,6 +17,8 @@ namespace API.Controllers.v1.Tracking
         public DateTime DateTime { get; set; }
         public string UserName { get; set; }
         public string Code { get; set; }
+        public string DamageCode { get; set; }
+
 
         public override void CustomMappings(IMappingExpression<Damaged, DamagedDto> mapping)
         {

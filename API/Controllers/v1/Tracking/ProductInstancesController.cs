@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -289,10 +290,10 @@ namespace API.Controllers.v1.Tracking
 
         [HttpGet("[action]")]
         [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.ProductInstanceList)]
-        public virtual ApiResult<IQueryable<StopDto>> GetStopList([FromQuery] DataRequest request, string code = null, int? machineId = null, DateTime? date = null)
+        public virtual ApiResult<List<StopDto>> GetStopList([FromQuery] DataRequest request, string code = null, int? machineId = null, DateTime? date = null)
         {
             //var predicate = request.GetFilter<ProductInstance>();
-            var data0 = _stopRepository.GetAll().Include(x => x.Machine).AsQueryable();
+            var data0 = _stopRepository.GetAll().Include(x => x.Machine).Include(x => x.StopDetails).AsQueryable();
             if (!string.IsNullOrWhiteSpace(code))
                 data0 = data0.Where(x => x.Code == code);
 
@@ -302,8 +303,18 @@ namespace API.Controllers.v1.Tracking
             if (date.HasValue)
                 data0 = data0.Where(x => x.InsertDateTime.Date == date.Value.Date);
 
-            var data = data0.OrderBy(request.Sort, request.SortType).OrderByDescending(x => x.Id).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<StopDto>();
-            Response.Headers.Add("X-Pagination", data0.Count().ToString());
+            var data = data0.OrderBy(request.Sort, request.SortType).OrderByDescending(x => x.Id)
+                .Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ToList()
+                .Select(x => new StopDto
+                {
+                    Id = x.Id,
+                    MachineCode = x.Machine.Code,
+                    InsertDateTime = x.InsertDateTime,
+                    LastStatus = x.StopDetails.OrderByDescending(x => x.InsertDateTime).FirstOrDefault()!.StopDetailType.ToString(),
+                    Code = x.Code,
+                    MachineName = x.Machine.Name
+                }).ToList();
+            Response.Headers.Add("X-Pagination", data.Count().ToString());
             return Ok(data);
         }
 
