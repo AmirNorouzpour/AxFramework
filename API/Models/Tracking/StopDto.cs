@@ -12,9 +12,10 @@ namespace API.Models.Tracking
         public string MachineCode { get; set; }
         public string Code { get; set; }
         public string LastStatus { get; set; }
+        public int Step { get; set; }
         public bool Description { get; set; }
         public string InsertDateTime { get; set; }
-        ICollection<StopDetail> StopDetails { get; set; }
+        public ICollection<StopDetail> StopDetails { get; set; }
         public override void CustomMappings(IMappingExpression<Stop, StopDto> mapping)
         {
             mapping.ForMember(

@@ -12,7 +12,7 @@ namespace Entities.Tracking
         public Machine Machine { get; set; }
         public string Code { get; set; }
         public string Description { get; set; }
-        ICollection<StopDetail> StopDetails { get; set; }
+        public ICollection<StopDetail> StopDetails { get; set; }
 
     }
 

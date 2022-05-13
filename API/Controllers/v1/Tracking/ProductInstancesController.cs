@@ -32,12 +32,13 @@ namespace API.Controllers.v1.Tracking
         private readonly IBaseRepository<Machine> _machineRepository;
         private readonly IBaseRepository<Damaged> _damagedRepository;
         private readonly IBaseRepository<Stop> _stopRepository;
+        private readonly IBaseRepository<StopDetail> _stopDetailRepository;
         private readonly IUserConnectionService _userConnectionService;
         private readonly IBaseRepository<BarChart> _barChartRepository;
         private readonly IHubContext<AxHub> _hub;
 
 
-        public ProductInstancesController(IBaseRepository<ProductInstance> repository, IBaseRepository<Personnel> personnelRepository, IBaseRepository<ProductInstanceHistory> productInstanceHistoryRepository, IUserConnectionService userConnectionService, IBaseRepository<BarChart> barChartRepository, IHubContext<AxHub> hub, IBaseRepository<Machine> machineRepository, IBaseRepository<Damaged> damagedRepository, IBaseRepository<Stop> stopRepository)
+        public ProductInstancesController(IBaseRepository<ProductInstance> repository, IBaseRepository<Personnel> personnelRepository, IBaseRepository<ProductInstanceHistory> productInstanceHistoryRepository, IUserConnectionService userConnectionService, IBaseRepository<BarChart> barChartRepository, IHubContext<AxHub> hub, IBaseRepository<Machine> machineRepository, IBaseRepository<Damaged> damagedRepository, IBaseRepository<Stop> stopRepository, IBaseRepository<StopDetail> stopDetailRepository)
         {
             _repository = repository;
             _personnelRepository = personnelRepository;
@@ -48,6 +49,7 @@ namespace API.Controllers.v1.Tracking
             _machineRepository = machineRepository;
             _damagedRepository = damagedRepository;
             _stopRepository = stopRepository;
+            _stopDetailRepository = stopDetailRepository;
         }
 
         [HttpGet]
@@ -314,26 +316,50 @@ namespace API.Controllers.v1.Tracking
             if (personel == null)
                 return new ApiResult<StopDto>(false, ApiResultStatusCode.LogicError, null, "برای کاربری پرسنل تعریف نشده است");
 
-
-            var p = await _stopRepository.GetFirstAsync(x => x.Code == dto.Code, cancellationToken);
-            if (p == null)
+            var machine = await _machineRepository.GetFirstAsync(x => x.Code == dto.MachineCode, cancellationToken);
+            if (machine == null)
             {
-                return new ApiResult<StopDto>(false, ApiResultStatusCode.LogicError, null, "این محصول هنوز وارد چرخه تولید نشده است");
+                return new ApiResult<StopDto>(false, ApiResultStatusCode.LogicError, null, "ماشین یافت نشد");
             }
 
-            var stop = new Stop
+            if (dto.Step == 1)
             {
-                CreatorUserId = UserId,
-                InsertDateTime = DateTime.Now,
-                MachineId = 0,
-                Code = dto.Code
-            };
+                var stop = new Stop
+                {
+                    CreatorUserId = UserId,
+                    InsertDateTime = DateTime.Now,
+                    MachineId = machine.Id,
+                    Code = dto.Code
+                };
+                await _stopRepository.AddAsync(stop, cancellationToken);
 
-            await _stopRepository.AddAsync(stop, cancellationToken);
+                var stopDetail = new StopDetail
+                {
+                    CreatorUserId = UserId,
+                    InsertDateTime = DateTime.Now,
+                    StopDetailType = (StopDetailType)dto.Step,
+                    PersonnelId = personel.Id,
+                    StopId = stop.Id
+                };
+                await _stopDetailRepository.AddAsync(stopDetail, cancellationToken);
+            }
+            else
+            {
+                var stopOld = await _stopRepository.GetAll(x => x.Code == dto.Code && x.Machine.Code == dto.MachineCode).Include(x => x.Machine).OrderByDescending(x => x.InsertDateTime).FirstOrDefaultAsync(cancellationToken);
+                if (stopOld == null)
+                    return new ApiResult<StopDto>(false, ApiResultStatusCode.LogicError, dto, "Old Stop is null!");
+                var stopDetail = new StopDetail
+                {
+                    CreatorUserId = UserId,
+                    InsertDateTime = DateTime.Now,
+                    StopDetailType = (StopDetailType)dto.Step,
+                    PersonnelId = personel.Id,
+                    StopId = stopOld.Id
+                };
+                await _stopDetailRepository.AddAsync(stopDetail, cancellationToken);
+            }
 
             return new ApiResult<StopDto>(true, ApiResultStatusCode.Success, null);
         }
-
-
     }
 }
