@@ -56,7 +56,7 @@ namespace API.Controllers.v1.Basic
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
             IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileRepository, IBaseRepository<UserMessage> userMessageRepository,
             IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository,
-            IHubContext<AxHub> hub, IBaseRepository<AxGroup> groupRepository)
+            IHubContext<AxHub> hub, IBaseRepository<AxGroup> groupRepository, IBaseRepository<Permission> permissionRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -72,6 +72,7 @@ namespace API.Controllers.v1.Basic
             _memoryCache = memoryCache;
             _hub = hub;
             _groupRepository = groupRepository;
+            _permissionRepository = permissionRepository;
         }
 
         /// <summary>
@@ -80,82 +81,10 @@ namespace API.Controllers.v1.Basic
         /// <param name="loginDto"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        [AxAuthorize(StateType = StateType.UniqueKey)]
+        [AxAuthorize(StateType = StateType.Ignore)]
         [HttpPost("[action]")]
         public async Task<ApiResult<AccessToken>> AxToken(LoginDto loginDto, CancellationToken cancellationToken)
         {
-            var passwordHash = SecurityHelper.GetSha256Hash(loginDto.Password);
-            var user = await _userRepository.GetFirstAsync(x => x.UserName == loginDto.Username && x.Password == passwordHash, cancellationToken);
-
-            var address = Request.HttpContext.Connection.RemoteIpAddress;
-            var computerName = address.GetDeviceName();
-            var ip = address.GetIp();
-
-            #region loginLog And configLoad
-
-            var userAgent = Request.Headers["User-Agent"].ToString();
-            var uaParser = Parser.GetDefault();
-            var info = uaParser.Parse(userAgent);
-            var loginlog = new LoginLog
-            {
-                Browser = info.UA.Family,
-                BrowserVersion = info.UA.Major + "." + info.UA.Minor,
-                UserId = user?.Id,
-                CreatorUserId = user?.Id ?? 0,
-                InvalidPassword = user == null ? loginDto.Password : null,
-                Ip = ip,
-                AppVersion = "FromAxTokenLogin",
-                MachineName = computerName,
-                Os = info.Device + " " + info.OS,
-                UserName = loginDto.Username,
-                ValidSignIn = user != null,
-                InsertDateTime = DateTime.Now
-            };
-            await _loginlogRepository.AddAsync(loginlog, cancellationToken);
-            #endregion
-
-            if (user == null)
-                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthenticated, null, "Username or Password is incorrect!");
-
-            var clientId = Guid.NewGuid().ToString();
-            var token = await _jwtService.GenerateAsync(user, clientId);
-
-            var userToken = new UserToken
-            {
-                Active = true,
-                Token = token.access_token,
-                UserAgent = userAgent,
-                Ip = ip,
-                DeviceName = computerName,
-                UserId = user.Id,
-                ClientId = clientId,
-                CreatorUserId = user.Id,
-                InsertDateTime = DateTime.Now,
-                Browser = info.UA.ToString(),
-                ExpireDateTime = token.expires_in.UnixTimeStampToDateTime()
-            };
-
-            //Response.Cookies.Append("AxToken", token.access_token);
-            await _userTokenRepository.AddAsync(userToken, cancellationToken);
-
-            await Task.Run(() =>
-            {
-                var oldTokens = _userTokenRepository.GetAll(t => t.ExpireDateTime < DateTime.Now);
-                _userTokenRepository.DeleteRange(oldTokens);
-            }, cancellationToken);
-
-            await _userRepository.UpdateLastLoginDateAsync(user, cancellationToken);
-
-            return token;
-        }
-
-        [AxAuthorize(StateType = StateType.UniqueKey)]
-        [HttpPost("[action]")]
-        public async Task<ApiResult<AccessToken>> AxToken2(LoginDto loginDto, CancellationToken cancellationToken)
-        {
-            if (loginDto.Username != "admin")
-                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthenticated, null, "Username or Password is incorrect!");
-
             var passwordHash = SecurityHelper.GetSha256Hash(loginDto.Password);
             var user = await _userRepository.GetFirstAsync(x => x.UserName == loginDto.Username && x.Password == passwordHash, cancellationToken);
 
@@ -276,7 +205,7 @@ namespace API.Controllers.v1.Basic
             {
                 var dataDto = _configDataRepository.TableNoTracking.ProjectTo<ConfigDataDto>().FirstOrDefault(x => x.Active);
                 if (dataDto == null)
-                    throw new NotFoundException("تنظیمات اولیه سامانه به درستی انجام نشده است");
+                    throw new LogicException("Init config not Set!");
                 return dataDto;
             });
 
