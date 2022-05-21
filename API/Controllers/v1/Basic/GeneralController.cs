@@ -136,15 +136,16 @@ namespace API.Controllers.v1.Basic
             var now = DateTime.Now;
             var thisMonth = new DateTime(now.Year, now.Month, 1);
             thisMonth = thisMonth.AddMonths(-100);
-            var data = _axPositionLogRepository.GetAll(x => x.ExitTime.HasValue && x.ExitTime >= thisMonth).ToList().GroupBy(x => new { x.ExitTime.GetValueOrDefault().Year, x.ExitTime.GetValueOrDefault().Month }).ToList();
+            var data = _axPositionLogRepository.GetAll(x => x.ExitTime.HasValue && x.ExitTime >= thisMonth && (x.ProfitPercent > 1 || x.ProfitPercent < -1)).ToList().GroupBy(x => new { x.ExitTime.GetValueOrDefault().Year, x.ExitTime.GetValueOrDefault().Month }).ToList();
 
             var thisMonthData = data.Select(x => new
             {
                 Month = new DateTime(x.Key.Year, x.Key.Month, 1).ToString("MMMM"),
                 SumOfProfitPercent = x.Sum(t => t.ProfitPercent),
                 SumOfProfit = x.Sum(t => t.Profit),
-                Trades = x
-
+                Trades = x.OrderByDescending(t => t.ExitTime),
+                SuccessCount = x.Count(t => t.ProfitPercent > 1),
+                FaieldCount = x.Count(t => t.ProfitPercent < -1)
             });
 
             return Ok(thisMonthData);
