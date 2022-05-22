@@ -51,8 +51,8 @@ namespace API.Controllers.v1.Basic
         public async Task<ApiResult<UserData>> AddApiUser(UserDataDto userDataDto, CancellationToken cancellationToken)
         {
             var ip = HttpContext.Connection.RemoteIpAddress;
-            //if (ip.ToString() != "2.186.122.127" || ip.ToString() != "65.108.14.168")
-            //    return new ApiResult<UserData>(false, ApiResultStatusCode.UnAuthorized, null, "UnAuthorized IP");
+            if (ip.ToString() != "2.186.122.127" || ip.ToString() != "65.108.14.168")
+                return new ApiResult<UserData>(false, ApiResultStatusCode.UnAuthorized, null, "UnAuthorized IP");
 
             var userData = await _userDataRepository.GetFirstAsync(x => x.MobileNumber == userDataDto.MobileNumber, cancellationToken);
             if (userData != null)
