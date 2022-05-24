@@ -147,7 +147,7 @@ namespace API.Controllers.v1.Tracking
             foreach (var shift in shifts)
             {
                 var ssItems = shift.StartTime.Split(':');
-                var seItems = shift.StartTime.Split(':');
+                var seItems = shift.EndTime.Split(':');
                 var start = new TimeSpan(int.Parse(ssItems[0]), int.Parse(ssItems[1]), 0);
                 var end = new TimeSpan(int.Parse(seItems[0]), int.Parse(seItems[1]), 0);
                 TimeSpan now = DateTime.Now.TimeOfDay;
