@@ -57,7 +57,7 @@ namespace Common.Utilities
                     if (cols.Contains(property.Name) || cols == null)
                         workSheet.Cells[1, i].Value = property.Name;
                 }
-            }   
+            }
 
             if (data != null)
                 for (var i = 1; i <= data.Count; i++)
@@ -73,7 +73,11 @@ namespace Common.Utilities
                                 continue;
 
                             if (cols.Contains(property.Name) || cols == null)
+                            {
                                 workSheet.Cells[i + 1, j + 1].Value = property.GetValue(row);
+                                //if (property.Name == "EnterTime")
+                                //    workSheet.Cells[i + 1, j + 1].Value = ((DateTime)property.GetValue(row)).ToPerDateTimeString();
+                            }
                         }
                     }
                 }

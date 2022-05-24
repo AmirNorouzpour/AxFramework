@@ -34,12 +34,13 @@ namespace API.Controllers.v1.Tracking
         private readonly IBaseRepository<Damaged> _damagedRepository;
         private readonly IBaseRepository<Stop> _stopRepository;
         private readonly IBaseRepository<StopDetail> _stopDetailRepository;
+        private readonly IBaseRepository<Shift> _shiftRepository;
         private readonly IUserConnectionService _userConnectionService;
         private readonly IBaseRepository<BarChart> _barChartRepository;
         private readonly IHubContext<AxHub> _hub;
 
 
-        public ProductInstancesController(IBaseRepository<ProductInstance> repository, IBaseRepository<Personnel> personnelRepository, IBaseRepository<ProductInstanceHistory> productInstanceHistoryRepository, IUserConnectionService userConnectionService, IBaseRepository<BarChart> barChartRepository, IHubContext<AxHub> hub, IBaseRepository<Machine> machineRepository, IBaseRepository<Damaged> damagedRepository, IBaseRepository<Stop> stopRepository, IBaseRepository<StopDetail> stopDetailRepository)
+        public ProductInstancesController(IBaseRepository<ProductInstance> repository, IBaseRepository<Personnel> personnelRepository, IBaseRepository<ProductInstanceHistory> productInstanceHistoryRepository, IUserConnectionService userConnectionService, IBaseRepository<BarChart> barChartRepository, IHubContext<AxHub> hub, IBaseRepository<Machine> machineRepository, IBaseRepository<Damaged> damagedRepository, IBaseRepository<Stop> stopRepository, IBaseRepository<StopDetail> stopDetailRepository, IBaseRepository<Shift> shiftRepository)
         {
             _repository = repository;
             _personnelRepository = personnelRepository;
@@ -51,6 +52,7 @@ namespace API.Controllers.v1.Tracking
             _damagedRepository = damagedRepository;
             _stopRepository = stopRepository;
             _stopDetailRepository = stopDetailRepository;
+            _shiftRepository = shiftRepository;
         }
 
         [HttpGet]
@@ -139,8 +141,24 @@ namespace API.Controllers.v1.Tracking
             if (personel == null)
                 return new ApiResult<ProductInstanceDto>(false, ApiResultStatusCode.LogicError, null, "برای کاربری پرسنل تعریف نشده است");
 
-
+            var shifId = 0;
             var m = await _machineRepository.GetAll(x => x.Id == dto.MachineId).Include(x => x.OperationStation).FirstOrDefaultAsync(cancellationToken);
+            var shifts = _shiftRepository.GetAll().ToList();
+            foreach (var shift in shifts)
+            {
+                var ssItems = shift.StartTime.Split(':');
+                var seItems = shift.StartTime.Split(':');
+                var start = new TimeSpan(int.Parse(ssItems[0]), int.Parse(ssItems[1]), 0);
+                var end = new TimeSpan(int.Parse(seItems[0]), int.Parse(seItems[1]), 0);
+                TimeSpan now = DateTime.Now.TimeOfDay;
+
+                if (start < end)
+                    if (start <= now && now <= end)
+                    {
+                        shifId = shift.Id;
+                    }
+            }
+
 
             var p = _repository.GetFirst(x => x.Code == dto.Code);
             if (p == null)
@@ -158,7 +176,7 @@ namespace API.Controllers.v1.Tracking
                     CreatorUserId = UserId,
                     InsertDateTime = DateTime.Now,
                     PersonnelId = personel.Id,
-                    ShiftId = 3,
+                    ShiftId = shifId,
                     ProductInstanceId = productInstance.Id,
                     EnterTime = DateTime.Now
                 };
@@ -187,7 +205,7 @@ namespace API.Controllers.v1.Tracking
                     CreatorUserId = UserId,
                     InsertDateTime = DateTime.Now,
                     PersonnelId = personel.Id,
-                    ShiftId = 3,
+                    ShiftId = shifId,
                     ProductInstanceId = p.Id
                 };
 
