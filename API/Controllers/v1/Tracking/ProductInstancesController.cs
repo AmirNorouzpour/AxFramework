@@ -149,14 +149,14 @@ namespace API.Controllers.v1.Tracking
                 var ssItems = shift.StartTime.Split(':');
                 var seItems = shift.EndTime.Split(':');
                 var start = new TimeSpan(int.Parse(ssItems[0]), int.Parse(ssItems[1]), 0);
-                var end = new TimeSpan(int.Parse(seItems[0]), int.Parse(seItems[1]), 0);
+                var end = start.Add(new TimeSpan(12, 0, 0));
+
                 TimeSpan now = DateTime.Now.TimeOfDay;
 
-                if (start < end)
-                    if (start <= now && now <= end)
-                    {
-                        shifId = shift.Id;
-                    }
+                if (start <= now && now <= end)
+                {
+                    shifId = shift.Id;
+                }
             }
 
 
