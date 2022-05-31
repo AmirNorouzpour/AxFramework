@@ -327,7 +327,7 @@ namespace API.Controllers.v1.Basic
             if (user.UserName != "admin")
                 return null;
 
-            var users = _userRepository.GetAll().OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<UserSelectDto>();
+            var users = _userRepository.GetAll().Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<UserSelectDto>();
             Response.Headers.Add("X-Pagination", _userRepository.Count().ToString());
             return Ok(users);
         }
