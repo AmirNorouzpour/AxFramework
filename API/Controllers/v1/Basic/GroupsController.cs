@@ -32,7 +32,7 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.Authorized, Order = 0, AxOp = AxOp.GroupList, ShowInMenu = true)]
         public ApiResult<IQueryable<AxGroupDto>> Get([FromQuery] DataRequest request, CancellationToken cancellationToken)
         {
-            var groups = _groupRepository.GetAll().OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<AxGroupDto>();
+            var groups = _groupRepository.GetAll().Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<AxGroupDto>();
             Response.Headers.Add("X-Pagination", _groupRepository.Count().ToString());
             return Ok(groups);
         }
