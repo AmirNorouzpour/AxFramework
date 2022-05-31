@@ -34,10 +34,10 @@ namespace API.Hubs
         {
             var list = new List<string>
             {
-                "1INCHUSDT", "AAVEUSDT", "ADAUSDT", "MATICUSDT", "ALGOUSDT", "ALPHAUSDT", "ALICEUSDT", "ANKRUSDT", "ATOMUSDT",
+                "GMTUSDT", "AAVEUSDT", "ADAUSDT", "MATICUSDT", "ALGOUSDT", "ALPHAUSDT", "ALICEUSDT", "ANKRUSDT", "ATOMUSDT",
                 "SNXUSDT", "AVAXUSDT", "ZECUSDT", "SKLUSDT", "LRCUSDT", "DYDXUSDT", "WAVESUSDT", "OCEANUSDT", "LUNAUSDT",
                 "ROSEUSDT", "ONEUSDT", "ENJUSDT", "CRVUSDT", "YFIUSDT", "THETAUSDT", "DOTUSDT", "GALAUSDT", "VETUSDT",
-                "COMPUSDT", "SOLUSDT", "KAVAUSDT", "XTZUSDT", "CHZUSDT", "SUSHIUSDT", "EGLDUSDT"
+                "COMPUSDT", "SOLUSDT", "KAVAUSDT", "XTZUSDT", "CHZUSDT", "SUSHIUSDT", "EGLDUSDT","BTCUSDT"
             };
 
             var symbols = _memoryCache.Get<List<Symbol>>(CacheKeys.SymbolsData);
@@ -99,12 +99,14 @@ namespace API.Hubs
                     var p = axbs!.Candles[^3];
                     var c = axbs!.Candles[^2];
                     if (p == null)
-                        return;
+                        continue;
 
                     var isRed = c.HaOpen > c.HaClose;
                     var body = Math.Abs(c.HaOpen - c.HaClose);
                     var us = isRed ? c.HaHigh - c.HaOpen : c.HaHigh - c.HaClose;
                     var ds = isRed ? c.HaClose - c.HaLow : c.HaOpen - c.HaLow;
+                    if (ds == 0)
+                        continue;
                     var div = us / ds;
                     if (us < ds)
                         div = ds / us;
