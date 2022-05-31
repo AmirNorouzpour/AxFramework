@@ -11,6 +11,7 @@ namespace Entities.Framework
         public Subscription Subscription { get; set; }
         [Precision(18, 8)]
         public decimal Amount { get; set; }
+        public string Currency { get; set; }
         public PaymentStatus Status { get; set; }
         public string TransactionId { get; set; }
         public string Coin { get; set; }
