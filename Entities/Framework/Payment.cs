@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Entities.Framework
 {
@@ -8,6 +9,7 @@ namespace Entities.Framework
         public int SubscriptionId { get; set; }
 
         public Subscription Subscription { get; set; }
+        [Precision(18, 8)]
         public decimal Amount { get; set; }
         public PaymentStatus Status { get; set; }
         public string TransactionId { get; set; }
