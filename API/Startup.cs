@@ -13,12 +13,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using NLog;
 using Services.Services;
 using WebFramework.Configuration;
 using WebFramework.CustomMapping;
 using WebFramework.Middlewares;
 using WebFramework.Swagger;
 using WebFramework.UserData;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace API
 {
@@ -43,7 +45,7 @@ namespace API
             services.AddDbContext(Configuration);
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
-                builder.WithOrigins("http://localhost:4200").WithMethods("GET","POST","DELETE","PUT")
+                builder.WithOrigins("http://localhost:4200").WithMethods("GET", "POST", "DELETE", "PUT")
                     .AllowAnyMethod().WithExposedHeaders("X-Pagination")
                     .AllowAnyHeader().AllowCredentials();
             }));

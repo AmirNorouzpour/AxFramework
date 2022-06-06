@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +15,9 @@ using Entities.Framework;
 using Entities.MasterSignal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using NLog;
+using NLog.Web;
 using WebFramework.Api;
 using WebFramework.Filters;
 
@@ -26,11 +30,13 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<UserData> _userDataRepository;
         private readonly IBaseRepository<AxPositionLog> _axPositionLogRepository;
 
+
         public GeneralController(IBaseRepository<ConfigData> repository, IBaseRepository<UserData> userDataRepository, IBaseRepository<AxPositionLog> axPositionLogRepository)
         {
             _repository = repository;
             _userDataRepository = userDataRepository;
             _axPositionLogRepository = axPositionLogRepository;
+
         }
 
 
@@ -51,10 +57,14 @@ namespace API.Controllers.v1.Basic
         public async Task<ApiResult<UserData>> AddApiUser(UserDataDto userDataDto, CancellationToken cancellationToken)
         {
             var ip = HttpContext.Connection.RemoteIpAddress;
-            if (ip.ToString() != "2.186.122.127" || ip.ToString() != "65.108.14.168")
+
+            //var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+            //logger.Fatal("IP: " + ip);
+            if (ip.ToString() != "2.186.122.127" && ip.ToString() != "65.108.14.168")
                 return new ApiResult<UserData>(false, ApiResultStatusCode.UnAuthorized, null, "UnAuthorized IP");
 
-            var userData = await _userDataRepository.GetFirstAsync(x => x.MobileNumber == userDataDto.MobileNumber, cancellationToken);
+            var userData = await _userDataRepository.GetFirstAsync(x => x.MobileNumber == userDataDto.MobileNumber,
+                cancellationToken);
             if (userData != null)
                 return new ApiResult<UserData>(true, ApiResultStatusCode.Success, userData, "اکانت قبلا ثبت شده است");
 
@@ -67,7 +77,8 @@ namespace API.Controllers.v1.Basic
             var balance = res.Data.FirstOrDefault(x => x.Asset == @"USDT")?.WalletBalance;
 
             if (balance == null)
-                return new ApiResult<UserData>(true, ApiResultStatusCode.LogicError, null, "موجودی به تتر در اکنت فیوچرز یافت نشد");
+                return new ApiResult<UserData>(true, ApiResultStatusCode.LogicError, null,
+                    "موجودی به تتر در اکنت فیوچرز یافت نشد");
 
 
             var u = new UserData
@@ -84,7 +95,6 @@ namespace API.Controllers.v1.Basic
             };
             await _userDataRepository.AddAsync(u, cancellationToken);
             return u;
-
         }
 
         [AxAuthorize(StateType = StateType.Ignore)]
