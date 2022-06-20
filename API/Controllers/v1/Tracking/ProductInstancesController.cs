@@ -144,16 +144,18 @@ namespace API.Controllers.v1.Tracking
             var shifId = 0;
             var m = await _machineRepository.GetAll(x => x.Id == dto.MachineId).Include(x => x.OperationStation).FirstOrDefaultAsync(cancellationToken);
             var shifts = _shiftRepository.GetAll().ToList();
+            var now = DateTime.Now;
             foreach (var shift in shifts)
             {
                 var ssItems = shift.StartTime.Split(':');
                 var seItems = shift.EndTime.Split(':');
-                var start = new TimeSpan(int.Parse(ssItems[0]), int.Parse(ssItems[1]), 0);
-                var end = start.Add(new TimeSpan(12, 0, 0));
+                var start = new DateTime(now.Year, now.Month, now.Day, int.Parse(ssItems[0]), int.Parse(ssItems[1]), 0);
+                var end = new DateTime(now.Year, now.Month, now.Day, int.Parse(seItems[0]), int.Parse(seItems[1]), 0);
 
-                TimeSpan now = DateTime.Now.TimeOfDay;
+                if (end < start && now.Hour < end.Hour)
+                    start = start.AddDays(-1);
 
-                if (start <= now && now <= end)
+                if (now >= start && now <= end)
                 {
                     shifId = shift.Id;
                 }
@@ -174,11 +176,11 @@ namespace API.Controllers.v1.Tracking
                     UserId = UserId,
                     MachineId = dto.MachineId,
                     CreatorUserId = UserId,
-                    InsertDateTime = DateTime.Now,
+                    InsertDateTime = now,
                     PersonnelId = personel.Id,
                     ShiftId = shifId,
                     ProductInstanceId = productInstance.Id,
-                    EnterTime = DateTime.Now
+                    EnterTime = now
                 };
                 await _productInstanceHistoryRepository.AddAsync(pih, cancellationToken);
             }
@@ -203,18 +205,18 @@ namespace API.Controllers.v1.Tracking
                     UserId = UserId,
                     MachineId = dto.MachineId,
                     CreatorUserId = UserId,
-                    InsertDateTime = DateTime.Now,
+                    InsertDateTime = now,
                     PersonnelId = personel.Id,
                     ShiftId = shifId,
                     ProductInstanceId = p.Id
                 };
 
                 if (dto.IsEnter)
-                    pih.EnterTime = DateTime.Now;
+                    pih.EnterTime = now;
 
                 if (!dto.IsEnter && row != null)
                 {
-                    row.ExitTime = DateTime.Now;
+                    row.ExitTime = now;
                     await _productInstanceHistoryRepository.UpdateAsync(row, cancellationToken);
                 }
                 else
