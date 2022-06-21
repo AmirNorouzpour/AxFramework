@@ -155,7 +155,7 @@ namespace API.Controllers.v1.Tracking
                 if (end < start && now.Hour < end.Hour)
                     start = start.AddDays(-1);
 
-                if (now >= start && now <= end)
+                if (now >= start/* && now <= end*/)
                 {
                     shifId = shift.Id;
                 }
