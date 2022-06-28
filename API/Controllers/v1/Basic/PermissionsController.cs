@@ -24,7 +24,7 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<UserSetting> _userSettingRepository;
         private readonly IMemoryCache _memoryCache;
 
-        public PermissionsController(IBaseRepository<Permission> repository, IBaseRepository<Menu> menuRepository, IMemoryCache memoryCache, IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<User> userRepository, IBaseRepository<UserSetting> userSettingRepository, IBaseRepository<AxSystem> systemRepository)
+        public PermissionsController(IBaseRepository<Permission> repository, IBaseRepository<Menu> menuRepository, IMemoryCache memoryCache, IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<User> userRepository, IBaseRepository<UserSetting> userSettingRepository)
         {
             _repository = repository;
             _menuRepository = menuRepository;
