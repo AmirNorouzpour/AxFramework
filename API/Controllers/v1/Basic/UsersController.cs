@@ -443,10 +443,10 @@ namespace API.Controllers.v1.Basic
         {
             var user = await _userRepository.GetFirstAsync(x => x.Id == dto.Id, cancellationToken);
             if (user == null)
-                return new ApiResult<string>(false, ApiResultStatusCode.LogicError, "کاربری یافت نشد");
+                return new ApiResult<string>(false, ApiResultStatusCode.LogicError, null, "کاربری یافت نشد");
 
             if (dto.Password != dto.RePassword)
-                return new ApiResult<string>(false, ApiResultStatusCode.LogicError, "رمز عبور و تکرار آن برابر نیستند");
+                return new ApiResult<string>(false, ApiResultStatusCode.LogicError, null, "رمز عبور و تکرار آن برابر نیستند");
 
             user.Password = SecurityHelper.GetSha256Hash(dto.Password);
             await _userRepository.UpdateAsync(user, cancellationToken);

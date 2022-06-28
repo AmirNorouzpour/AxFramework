@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Common;
 using FluentValidation;
 
@@ -18,6 +19,10 @@ namespace Entities.Framework
         public virtual ICollection<Menu> Children { get; set; }
         public AxOp AxOp { get; set; }
         public int OrderId { get; set; }
+        [NotMapped]
+        public bool Checked { get; set; }
+        [NotMapped]
+        public bool IsLeaf { get; set; }
     }
     public class MenuValidator : AbstractValidator<Menu> { }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using Common;
 using Common.Exception;
 using Common.Utilities;
@@ -35,9 +36,9 @@ namespace WebFramework.Filters
         {
             var context = filterContext.HttpContext;
             var memoryCache = filterContext.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
-          
+
             var userId = context.User.Identity.GetUserId<int>();
-            if (StateType == StateType.OnlyToken && userId <= 0)
+            if (StateType == StateType.OnlyToken && userId <= 0) 
                 throw new AppException(ApiResultStatusCode.UnAuthenticated, "شما برای دسترسی به منابع مورد نظر احراز هویت نشده اید", HttpStatusCode.Unauthorized);
 
             if (StateType == StateType.Authorized)
