@@ -10,7 +10,7 @@ public class DataSourceResult
     /// <summary>
     /// Represents a single page of processed data.
     /// </summary>
-    public IEnumerable Data { get; set; }
+    public IQueryable Data { get; set; }
 
     /// <summary>
     /// The total number of records available.

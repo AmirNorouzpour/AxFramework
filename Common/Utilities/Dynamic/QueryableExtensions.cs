@@ -31,7 +31,7 @@ public static class QueryableExtensions
 
         return new DataSourceResult
         {
-            Data = queryable.ToList(),
+            Data = queryable,
             Total = total
         };
     }

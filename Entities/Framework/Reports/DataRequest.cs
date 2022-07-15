@@ -45,12 +45,12 @@ namespace Entities.Framework.Reports
     public enum OperationType
     {
         Between = 1,
-        Contains = 2,
+        contains = 2,
         DoesNotContain = 3,
-        EndsWith = 4,
-        EqualTo = 5,
-        GreaterThan = 6,
-        GreaterThanOrEqualTo = 7,
+        endswith = 4,
+        eq = 5,
+        gt = 6,
+        gte = 7,
         In = 8,
         NotIn = 9,
         IsNull = 10,
@@ -58,10 +58,10 @@ namespace Entities.Framework.Reports
         IsNotEmpty = 12,
         IsNotNull = 13,
         IsNotNullNorWhiteSpace = 14,
-        LessThan = 15,
-        LessThanOrEqualTo = 16,
-        NotEqualTo = 17,
-        StartsWith = 18
+        lt = 15,
+        lte = 16,
+        neq = 17,
+        startswith = 18
     }
     public static class OperationExt
     {
@@ -71,17 +71,17 @@ namespace Entities.Framework.Reports
             {
                 case OperationType.Between:
                     return Operation.Between;
-                case OperationType.Contains:
+                case OperationType.contains:
                     return Operation.Contains;
                 case OperationType.DoesNotContain:
                     return Operation.DoesNotContain;
-                case OperationType.EndsWith:
+                case OperationType.endswith:
                     return Operation.EndsWith;
-                case OperationType.EqualTo:
+                case OperationType.eq:
                     return Operation.EqualTo;
-                case OperationType.GreaterThan:
+                case OperationType.gt:
                     return Operation.GreaterThan;
-                case OperationType.GreaterThanOrEqualTo:
+                case OperationType.gte:
                     return Operation.GreaterThanOrEqualTo;
                 case OperationType.In:
                     return Operation.In;
@@ -97,13 +97,13 @@ namespace Entities.Framework.Reports
                     return Operation.IsNotNull;
                 case OperationType.IsNotNullNorWhiteSpace:
                     return Operation.IsNotNullNorWhiteSpace;
-                case OperationType.LessThan:
+                case OperationType.lt:
                     return Operation.LessThan;
-                case OperationType.LessThanOrEqualTo:
+                case OperationType.lte:
                     return Operation.LessThanOrEqualTo;
-                case OperationType.NotEqualTo:
+                case OperationType.neq:
                     return Operation.NotEqualTo;
-                case OperationType.StartsWith:
+                case OperationType.startswith:
                     return Operation.StartsWith;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);

@@ -92,18 +92,18 @@ public class Filter
     {
         if (Filters != null && Filters.Any())
         {
-            return "(" + String.Join(" " + Logic + " ", Filters.Select(filter => filter.ToExpression(filters)).ToArray()) + ")";
+            return "(" + string.Join(" " + Logic + " ", Filters.Select(filter => filter.ToExpression(filters)).ToArray()) + ")";
         }
 
-        int index = filters.IndexOf(this);
+        var index = filters.IndexOf(this);
 
-        string comparison = operators[Operator];
+        var comparison = operators[Operator];
 
         if (comparison == "StartsWith" || comparison == "EndsWith" || comparison == "Contains")
         {
-            return String.Format("{0}.{1}(@{2})", Field, comparison, index);
+            return $"{Field}.{comparison}(@{index})";
         }
 
-        return String.Format("{0} {1} @{2}", Field, comparison, index);
+        return $"{Field} {comparison} @{index}";
     }
 }

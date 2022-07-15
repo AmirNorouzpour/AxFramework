@@ -303,8 +303,40 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.OnlyToken, Order = 0, AxOp = AxOp.UserList, ShowInMenu = true)]
         public ApiResult<IQueryable<UserSelectDto>> Get([FromQuery] DataRequest request)
         {
+            var d1 = DateTime.Now;
             var predicate = request.GetFilter<User>();
-            var users = _userRepository.GetAll(predicate).OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<UserSelectDto>();
+            var users = _userRepository.GetAll(predicate).OrderBy(request.Sort, request.SortType)
+                .Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<UserSelectDto>();
+            var d2 = DateTime.Now;
+            Response.Headers.Add("X-Pagination", _userRepository.Count(predicate).ToString());
+            //return Ok(users);
+
+
+            var d3 = DateTime.Now;
+
+            //var filters = new List<Filter>();
+            //if (request.Filters != null)
+            //{
+            //    foreach (var axFilter in request.Filters)
+            //    {
+            //        var f = new Filter
+            //        {
+            //            Operator = axFilter.Operation.ToString(),
+            //            Field = axFilter.Property,
+            //            Logic = axFilter.Connector.ToString().ToLower(),
+            //            Value = axFilter.Value1
+            //        };
+            //        filters.Add(f);
+            //    }
+            //}
+            //var users = _userRepository.GetAll().ToDataSourceResult(request.PageSize, request.PageIndex * request.PageSize,
+            //        new List<Sort> { new Sort { Field = request.Sort, Dir = request.SortType + "" } }, new Filter { Filters = filters, Logic = "and",Operator = "eq" , Value = "Amir" , Field = "FirstName"}).Data.ProjectTo<UserSelectDto>();
+        
+            var d4 = DateTime.Now;
+
+            var s1 = d2 - d1;
+            var s2 = d4 - d3;
+
             Response.Headers.Add("X-Pagination", _userRepository.Count(predicate).ToString());
             return Ok(users);
         }

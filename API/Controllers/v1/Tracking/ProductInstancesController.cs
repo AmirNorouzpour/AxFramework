@@ -187,8 +187,8 @@ namespace API.Controllers.v1.Tracking
             else
             {
 
-                var row = await _productInstanceHistoryRepository.GetFirstAsync(x => x.MachineId == dto.MachineId && x.ProductInstance.Code == dto.Code && x.EnterTime != null, cancellationToken);
-                var lastSeen = await _productInstanceHistoryRepository.GetAll(x => x.ProductInstance.Code == dto.Code && x.EnterTime != null)
+                var row = await _productInstanceHistoryRepository.GetFirstAsync(x => x.Machine.OperationStationId == m.OperationStationId && x.ProductInstance.Code == dto.Code && x.EnterTime != null, cancellationToken);
+                var lastSeen = await _productInstanceHistoryRepository.GetAll(x => x.ProductInstance.Code == dto.Code && x.EnterTime != null).OrderByDescending(x => x.InsertDateTime)
                     .Include(x => x.Machine.OperationStation).FirstOrDefaultAsync(cancellationToken);
                 //var hasExit = await _productInstanceHistoryRepository.GetFirstAsync(x => x.MachineId == dto.MachineId && x.ProductInstance.Code == dto.Code && x.ExitTime != null, cancellationToken);
 
@@ -197,9 +197,8 @@ namespace API.Controllers.v1.Tracking
                 //if (hasExit != null && !dto.IsEnter)
                 //    return new ApiResult<ProductInstanceDto>(false, ApiResultStatusCode.LogicError, null, "خروج این قطعه از ایستگاه قبلا ثبت شده است");
 
-                var opMachine = await _machineRepository.GetAll(x => x.Id == dto.MachineId).Include(x => x.OperationStation).FirstOrDefaultAsync(cancellationToken);
-                var opMachineNext = await _machineRepository.GetAll(x => x.OperationStation.ProductLineId == opMachine.OperationStation.ProductLineId && x.OperationStation.Order == lastSeen.Machine.OperationStation.Order + 1).Include(x => x.OperationStation).FirstOrDefaultAsync(cancellationToken);
-                var distance = opMachine.OperationStation.Order - lastSeen.Machine.OperationStation.Order;
+                var opMachineNext = await _machineRepository.GetAll(x => x.OperationStation.ProductLineId == m.OperationStation.ProductLineId && x.OperationStation.Order == lastSeen.Machine.OperationStation.Order + 1).Include(x => x.OperationStation).FirstOrDefaultAsync(cancellationToken);
+                var distance = m.OperationStation.Order - lastSeen.Machine.OperationStation.Order;
                 if (distance != 1)
                     return new ApiResult<ProductInstanceDto>(false, ApiResultStatusCode.LogicError, null, $"این قطعه ابتدا باید در ایستگاه {opMachineNext.OperationStation.Name} ثبت شود");
 
