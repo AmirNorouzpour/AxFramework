@@ -307,11 +307,11 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.OnlyToken)]
         public ApiResult<List<string>> GetUserPermissions(CancellationToken cancellationToken)
         {
-            var keys = _memoryCache.GetOrCreate("user" + UserId, entry =>
+            var keys = (_memoryCache.GetOrCreate("user" + UserId, entry =>
             {
                 var data = PermissionHelper.GetKeysFromDb(_permissionRepository, _userGroupRepository, UserId);
                 return data;
-            }).ToList();
+            }) ?? throw new InvalidOperationException()).ToList();
             return keys;
         }
 
@@ -374,7 +374,7 @@ namespace API.Controllers.v1.Basic
         [HttpPost("[action]/{userId}")]
         public async Task<IActionResult> UploadUserPic(int userId, CancellationToken cancellationToken)
         {
-            if (Request.Form.Files[0] == null || Request.Form.Files[0].Length == 0)
+            if (Request.Form.Files[0].Length == 0)
                 return Ok(new ApiResult(false, ApiResultStatusCode.BadRequest, "file not selected"));
 
             var files = _fileRepository.GetAll(x => x.Key == userId);
