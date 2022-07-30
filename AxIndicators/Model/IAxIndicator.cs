@@ -2,7 +2,7 @@
 
 namespace AxIndicators
 {
-    public interface IAxIndicator< T>
+    public interface IAxIndicator<T>
     {
         protected List<OHLC> OhlcList { get; set; }
         public T Calculate();
