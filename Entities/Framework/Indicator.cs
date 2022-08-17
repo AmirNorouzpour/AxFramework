@@ -27,5 +27,6 @@ namespace Entities.Framework
         public object Value { get; set; }
         public string Description { get; set; }
         public bool DataEntry { get; set; }
+        public string Id { get; set; }
     }
 }

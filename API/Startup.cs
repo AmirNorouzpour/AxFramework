@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -57,6 +58,7 @@ namespace API
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 });
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddEntityFrameworkSqlServer().AddDbContext<DataContext>();
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
             services.AddHostedService<TimedAuditLogHostedService>();
@@ -91,11 +93,11 @@ namespace API
                 endpoints.MapHub<AxHub>("/AxHub");
             });
 
-            //using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
-            //{
-            //    var context = serviceScope.ServiceProvider.GetRequiredService<DataContext>();
-            //    context.Database.Migrate();
-            //}
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()?.CreateScope())
+            {
+                var context = serviceScope?.ServiceProvider.GetRequiredService<DataContext>();
+                context?.Database.Migrate();
+            }
             var configurationVariable = Configuration.GetConnectionString("SqlServer");
             ConnSingleton.Instance.Value = configurationVariable;
             ConnSingleton.Instance.Name = "SqlServer";

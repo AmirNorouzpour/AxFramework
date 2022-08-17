@@ -20,7 +20,7 @@ namespace API.Data
                             Title = "Open",Parameters = new List<IndicatorParameter>{
                             new()
                             {
-                                Title = "Result",IsInput = false,Type = "list"
+                              Id="Open_Result",  Title = "Result",IsInput = false,Type = "list"
                             }
                         }},
                         new()
