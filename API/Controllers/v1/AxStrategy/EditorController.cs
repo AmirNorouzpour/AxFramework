@@ -26,7 +26,7 @@ namespace API.Controllers.v1.AxStrategy
 
         [HttpPost("[action]")]
         [AxAuthorize(StateType = StateType.OnlyToken)]
-        public async Task<ApiResult<string>> Save(UserStrategyDto data, CancellationToken cancellationToken)
+        public async Task<ApiResult<UserStrategyDto>> Save(UserStrategyDto data, CancellationToken cancellationToken)
         {
             var entity = data.ToEntity();
             var dbEntity = await _repository.GetAll(x => x.UserId == UserId && x.Unique == data.Unique).OrderByDescending(x => x.Version).FirstOrDefaultAsync(cancellationToken);
@@ -43,7 +43,10 @@ namespace API.Controllers.v1.AxStrategy
                 entity.UserId = UserId;
                 await _repository.AddAsync(entity, cancellationToken);
             }
-            return Ok(entity.Unique);
+
+            data.Version = entity.Version;
+            data.Unique = entity.Unique;
+            return Ok(data);
         }
 
         [HttpGet]
@@ -64,7 +67,7 @@ namespace API.Controllers.v1.AxStrategy
             var strategies = data.Select(x => new
             {
                 Unique = x.Key,
-                x.FirstOrDefault().Name,
+                x.OrderByDescending(y => y.InsertDateTime).FirstOrDefault().Name,
                 DateTime = x.OrderByDescending(y => y.InsertDateTime).FirstOrDefault().ModifiedDateTime.HasValue ? x.OrderByDescending(y => y.InsertDateTime).FirstOrDefault().ModifiedDateTime.Value : x.OrderByDescending(y => y.InsertDateTime).FirstOrDefault().InsertDateTime,
                 x.OrderByDescending(y => y.InsertDateTime).FirstOrDefault().Version,
                 Versions = x.OrderByDescending(y => y.Version).Select(y => y.Version)
