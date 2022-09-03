@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
+using Common.Utilities.Dynamic;
 
 public static class QueryableExtensions
 {
@@ -15,10 +16,14 @@ public static class QueryableExtensions
     /// <param name="sort">Specifies the current sort order.</param>
     /// <param name="filter">Specifies the current filter.</param>
     /// <returns>A DataSourceResult object populated from the processed IQueryable.</returns>
-    public static DataSourceResult ToDataSourceResult<T>(this IQueryable<T> queryable, int take, int skip, IEnumerable<Sort> sort, Filter filter)
+    public static DataSourceResult ToDataSourceResult<T>(this IQueryable<T> queryable, int take, int skip, IEnumerable<Sort> sort, List<Filter> filter)
     {
         // Filter the data first
-        queryable = Filter(queryable, filter);
+        if (filter != null)
+        {
+            var f = new Filter { Filters = filter };
+            queryable = Filter(queryable, f);
+        }
 
         // Calculate the total number of records (needed for paging)
         var total = queryable.Count();

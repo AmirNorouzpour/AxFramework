@@ -60,7 +60,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:API.Controllers.v1.Basic.UsersController.Get(Entities.Framework.Reports.DataRequest)">
+        <member name="M:API.Controllers.v1.Basic.UsersController.Get(Entities.Framework.Reports.DataRequest2)">
             <summary>
             Get All Users
             </summary>

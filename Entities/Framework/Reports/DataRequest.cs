@@ -25,6 +25,16 @@ namespace Entities.Framework.Reports
         public int PageIndex { get; set; }
     }
 
+    public class DataRequest2
+    {
+        //string filter, string sort, int page, int PageSize, SortType SortType
+        public List<Common.Utilities.Dynamic.Filter> Filters { get; set; }
+        public string Sort { get; set; }
+        public int PageSize { get; set; } = 50;
+        public SortType SortType { get; set; }
+        public int PageIndex { get; set; }
+    }
+
     public class AxFilter : BaseEntity
     {
         public string Property { get; set; }
