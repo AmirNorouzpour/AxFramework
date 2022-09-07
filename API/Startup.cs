@@ -2,6 +2,9 @@
 using API.Hubs;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Binance.Net.Clients;
+using Binance.Net.Interfaces.Clients;
+using Binance.Net.Interfaces.Clients.CoinFuturesApi;
 using Common;
 using Data;
 using Entities.Framework;
@@ -115,10 +118,9 @@ namespace API
 
         public void ConfigureContainer(ContainerBuilder builder)
         {
-            //builder.Populate(services);
-
-            //Register Services to Autofac ContainerBuilder
+            builder.RegisterType(typeof(BinanceClient)).As(typeof(IBinanceClient)).InstancePerLifetimeScope();
             builder.AddServices();
+
 
         }
 
