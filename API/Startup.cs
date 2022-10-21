@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using API.Hubs;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Binance.Net.Clients;
@@ -17,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using Services.Hubs;
 using Services.Services;
 using WebFramework.Configuration;
 using WebFramework.CustomMapping;
@@ -65,6 +65,7 @@ namespace API
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
             services.AddHostedService<TimedAuditLogHostedService>();
+            services.AddHostedService<KlineSocketHostedService>();
             services.AddSwagger();
             services.AddSignalR();
             services.Configure<ApiBehaviorOptions>(options =>

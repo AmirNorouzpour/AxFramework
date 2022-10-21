@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using API.Hubs;
 using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common;
@@ -18,6 +17,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Services;
+using Services.Hubs;
 using Services.Services;
 using Services.Services.Services;
 using UAParser;
@@ -136,7 +136,6 @@ namespace API.Controllers.v1.Basic
                 ExpireDateTime = token.expires_in.UnixTimeStampToDateTime()
             };
 
-            //Response.Cookies.Append("AxToken", token.access_token);
             await _userTokenRepository.AddAsync(userToken, cancellationToken);
 
             await Task.Run(() =>

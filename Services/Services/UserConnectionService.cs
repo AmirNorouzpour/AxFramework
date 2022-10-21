@@ -28,6 +28,12 @@ namespace Services.Services
             return connections;
         }
 
+        public List<string> GetActiveConnections(string symbol)
+        {
+            var connections = _repository.GetAll(x => x.UserToken.ExpireDateTime > DateTime.Now).Select(x => x.ConnectionId).ToList();
+            return connections;
+        }
+
         public List<string> GetActiveConnections(int userId)
         {
             var connections = _repository.GetAll(x => x.UserToken.ExpireDateTime > DateTime.Now &&x.UserId == userId).Select(x => x.ConnectionId).ToList();

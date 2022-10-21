@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
-namespace API.Hubs
+namespace Services.Hubs
 {
     public class AxHub : Hub
     {

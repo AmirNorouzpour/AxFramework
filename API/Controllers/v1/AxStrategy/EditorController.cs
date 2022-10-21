@@ -9,8 +9,12 @@ using API.Models;
 using AutoMapper.QueryableExtensions;
 using Data.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using WebFramework.Api;
 using WebFramework.Filters;
+using System.Collections.Generic;
+using AxIndicators.Model;
+using Skender.Stock.Indicators;
 
 namespace API.Controllers.v1.AxStrategy
 {
@@ -47,6 +51,45 @@ namespace API.Controllers.v1.AxStrategy
             data.Version = entity.Version;
             data.Unique = entity.Unique;
             return Ok(data);
+        }
+        public List<IAxIndicator> idxs = new() { new Close(), new Rsi(14) };
+
+        [HttpPost("[action]")]
+        [AxAuthorize(StateType = StateType.Ignore)]
+        public async Task<ApiResult<object>> Run(UserStrategyDto data, CancellationToken cancellationToken)
+        {
+            //var entity = data.ToEntity();
+            var quotes = new List<Quote> { new() { Close = (decimal)1469.68 }, new() { Close = (decimal)1467.71 }, new() { Close = (decimal)1468.05 }, new() { Close = (decimal)1467.80 }, new() { Close = (decimal)1467.00 }, new() { Close = (decimal)1464.76 }, new() { Close = (decimal)1463.50 }, new() { Close = (decimal)1461.17 }, new() { Close = (decimal)1463.70 }, new() { Close = (decimal)1461.33 }, new() { Close = (decimal)1461.76 }, new() { Close = (decimal)1462.87 }, new() { Close = (decimal)1461.41 }, new() { Close = (decimal)1457.69 }, new() { Close = (decimal)1446.06 }, new() { Close = (decimal)1456.14 }, new() { Close = (decimal)1451.81 }, new() { Close = (decimal)1461.00 }, new() { Close = (decimal)1457.01 }, new() { Close = (decimal)1461.39 }, new() { Close = (decimal)1464.37 }, new() { Close = (decimal)1462.99 }, new() { Close = (decimal)1466.33 }, new() { Close = (decimal)1471.54 }, new() { Close = (decimal)1467.96 }, new() { Close = (decimal)1454.55 }, new() { Close = (decimal)1452.74 }, new() { Close = (decimal)1455.11 }, new() { Close = (decimal)1450.70 }, new() { Close = (decimal)1453.54 }, new() { Close = (decimal)1454.98 }, new() { Close = (decimal)1452.49 }, new() { Close = (decimal)1451.67 }, new() { Close = (decimal)1455.16 }, new() { Close = (decimal)1453.38 }, new() { Close = (decimal)1453.76 }, new() { Close = (decimal)1454.79 }, new() { Close = (decimal)1450.50 }, new() { Close = (decimal)1451.32 }, new() { Close = (decimal)1452.48 }, new() { Close = (decimal)1451.31 }, new() { Close = (decimal)1449.98 }, new() { Close = (decimal)1454.52 }, new() { Close = (decimal)1453.43 }, new() { Close = (decimal)1452.70 }, new() { Close = (decimal)1453.16 }, new() { Close = (decimal)1454.21 }, new() { Close = (decimal)1455.77 } };
+            var res = "";
+            var dbEntity = await _repository.GetAll(x => x.Unique == data.Unique).OrderByDescending(x => x.Version).FirstOrDefaultAsync(cancellationToken);
+            if (dbEntity != null)
+            {
+                var model = JsonConvert.DeserializeObject<Model>(dbEntity.Data);
+                for (var index = 0; index < model.boxs.Count; index++)
+                {
+                    var box = model.boxs[index];
+                    if (index == 0)
+                    {
+                        res = @$"quotes
+  .Validate()
+  .Use(CandlePart.{box.indicator.title})";
+                    }
+
+                    var ps = "";
+                    var parameters = box.indicator.parameters.Where(x => x.isInput).ToList();
+                    foreach (var p in parameters)
+                    {
+                        if (p.isInput)
+                            ps += "," + 14;
+                    }
+                    res += $".Get{box.indicator.title}({ps})";
+                }
+            }
+
+            var aaaa = quotes
+                  //.Validate()
+                  .Use(CandlePart.Close).GetRsi(14).GetRsi(14).RemoveWarmupPeriods(14);
+            return Ok(quotes);
         }
 
         [HttpGet]
