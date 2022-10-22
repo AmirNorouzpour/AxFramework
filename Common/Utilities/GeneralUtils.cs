@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using OfficeOpenXml;
-using OfficeOpenXml.Style;
 
 namespace Common.Utilities
 {
@@ -33,67 +30,6 @@ namespace Common.Utilities
                 {".svg", "image/svg+xml"}
             };
         }
-
-         public static MemoryStream ExportToExcel<T>(List<T> data, string filename = null, string cols = null)
-        {
-            if (data?.Count == 0)
-                return new MemoryStream();
-
-            var properties = typeof(T).GetProperties();
-            using var pck = new ExcelPackage();
-            var workSheet = pck.Workbook.Worksheets.Add("Sheet1");
-            workSheet.DefaultRowHeight = 12;
-            for (var i = 1; i <= properties.Length; i++)
-            {
-                var property = properties[i - 1];
-                if (cols != null && cols.Contains(property.Name) || cols == null)
-                    workSheet.Cells[1, i].Value = property.Name;
-            }
-
-            for (var i = 1; i <= data.Count; i++)
-            {
-                var row = data[i - 1];
-                for (var j = 0; j < properties.Length; j++)
-                {
-                    var property = properties[j];
-                    if (cols != null && cols.Contains(property.Name) || cols == null)
-                        workSheet.Cells[i + 1, j + 1].Value = property.GetValue(row);
-
-                }
-            }
-            using (var range = workSheet.Cells[1, 1, 1, properties.Length])
-            {
-                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                range.Style.Fill.BackgroundColor.SetColor(Color.LightGray);
-                range.Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                range.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                range.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                range.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                range.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                range.Style.ReadingOrder = ExcelReadingOrder.LeftToRight;
-            }
-
-            using (var range = workSheet.Cells[2, 1, data.Count + 1, properties.Length])
-            {
-                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                range.Style.Fill.BackgroundColor.SetColor(Color.White);
-                range.Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                range.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                range.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                range.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                range.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                range.Style.ReadingOrder = ExcelReadingOrder.LeftToRight;
-            }
-
-            workSheet.Row(1).Height = 20;
-            workSheet.Cells[workSheet.Dimension.Address].AutoFitColumns();
-            var st = new MemoryStream();
-            pck.SaveAs(st);
-            return st;
-        }
-
         public static string GetClientOs(string ua)
         {
 
