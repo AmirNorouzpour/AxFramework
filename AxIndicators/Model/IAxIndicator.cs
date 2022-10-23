@@ -35,7 +35,7 @@ namespace AxIndicators.Model
             throw new Exception("arg is not Quote type");
         }
 
-        public string Title => "RSI";
+        public string Title => "Rsi";
 
     }
 

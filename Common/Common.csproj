@@ -15,9 +15,16 @@
   <ItemGroup>
     <PackageReference Include="Binance.Net" Version="8.0.6" />
     <PackageReference Include="DynamicExpresso.Core" Version="2.3.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.3.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.3.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.0-preview.3.22175.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.0-preview.3.22175.1" />
     <PackageReference Include="Pluralize.NET.Core" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AxIndicators\AxIndicators.csproj" />
   </ItemGroup>
 
   <ItemGroup>

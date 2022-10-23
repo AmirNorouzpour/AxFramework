@@ -11,10 +11,13 @@ using Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using WebFramework.Api;
-using WebFramework.Filters;
 using System.Collections.Generic;
+using WebFramework.Filters;
 using AxIndicators.Model;
+using Common.CSCodeExecuter;
 using Skender.Stock.Indicators;
+using DynamicExpresso;
+using Common.Utilities;
 
 namespace API.Controllers.v1.AxStrategy
 {
@@ -70,26 +73,32 @@ namespace API.Controllers.v1.AxStrategy
                     var box = model.boxs[index];
                     if (index == 0)
                     {
-                        res = @$"quotes
-  .Validate()
-  .Use(CandlePart.{box.indicator.title})";
+                        res = @$"var res = quotes
+  //.Validate()
+  .Use(CandlePart.{box.indicator.title.FirstCharToUpper()})";
+                        continue;
                     }
 
                     var ps = "";
-                    var parameters = box.indicator.parameters.Where(x => x.isInput).ToList();
+                    var parameters = box.indicator.parameters.Where(x => x.isInput && x.title != "Source").ToList();
                     foreach (var p in parameters)
                     {
-                        if (p.isInput)
-                            ps += "," + 14;
+                        ps += "," + 14;
                     }
-                    res += $".Get{box.indicator.title}({ps})";
+
+                    if (ps.Length > 0)
+                        ps = ps.Remove(0, 1);
+                    res += $".Get{box.indicator.title.FirstCharToUpper()}({ps})";
                 }
             }
 
-            var aaaa = quotes
-                  //.Validate()
-                  .Use(CandlePart.Close).GetRsi(14).GetRsi(14).RemoveWarmupPeriods(14);
-            return Ok(quotes);
+            res += "; return res;";
+
+            var value = ScriptManager.ExecuteScript(res, quotes);
+
+            return Ok(value);
+
+
         }
 
         [HttpGet]
