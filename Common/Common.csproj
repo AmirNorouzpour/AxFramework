@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <Reference Include="EPPlus">
-      <HintPath>..\..\AxTarder\AxTrader\bin\x64\Debug\EPPlus.dll</HintPath>
+      <HintPath>..\WebFramework\bin\Debug\netcoreapp3.1\EPPlus.dll</HintPath>
     </Reference>
   </ItemGroup>
 
