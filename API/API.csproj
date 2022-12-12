@@ -29,9 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="EPPlus">
-      <HintPath>..\..\AxTarder\AxTrader\bin\x64\Debug\EPPlus.dll</HintPath>
-    </Reference>
     <Reference Include="ExpressionBuilder">
       <HintPath>E:\tempIdm\ExpressionBuilder-master\ExpressionBuilder-master\ExpressionBuilder\bin\Debug\netstandard2.0\ExpressionBuilder.dll</HintPath>
     </Reference>
