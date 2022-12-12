@@ -35,8 +35,8 @@ namespace API.Controllers.v1.Tracking
 
             if (userIds != null)
             {
-                var userIdsArray = userIds.Split(',').Select(int.Parse);
-                data0 = data0.Where(x => userIdsArray.Contains(x.ProductInstance.Personnel.UserId));
+                var userIdsArray = userIds.Split(',').Select(int.Parse).ToList();
+                data0 = data0.Where(x => userIdsArray.Contains(x.UserId));
             }
 
             if (date1.HasValue)
@@ -52,7 +52,6 @@ namespace API.Controllers.v1.Tracking
                 data0 = data0.Where(x => x.Machine.OperationStation.ProductLineId == line);
             if (machine.HasValue)
                 data0 = data0.Where(x => x.MachineId == machine);
-
             var data = data0.OrderBy(request.Sort, request.SortType).OrderByDescending(x => x.Id).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<ProductInstanceHistoryDto>();
             Response.Headers.Add("X-Pagination", data0.Count().ToString());
             return Ok(data);
