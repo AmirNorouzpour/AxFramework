@@ -85,7 +85,7 @@ namespace API.Controllers.v1.Tracking
             var name = DateTime.Now.ToPerDateTimeString();
             var fileName = name + ".xlsx";
             var mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            var fileBytes = GeneralUtils.ExportToExcel(data.ToList(), "Id,Code,ShiftName,OpName,PersonnelName,Username,EnterTime");
+            var fileBytes = GeneralUtils.ExportToExcel(data.ToList(), "Id,Code,ShiftName,MachineName,OpName,PersonnelName,Username,Date,Time");
 
             return Task.FromResult(new FileContentResult(fileBytes.ToArray(), mimeType)
             {

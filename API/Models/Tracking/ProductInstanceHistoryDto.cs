@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Common.Utilities;
 using Entities.Tracking;
 using WebFramework.Api;
 using ValidationContext = System.ComponentModel.DataAnnotations.ValidationContext;
@@ -20,6 +21,8 @@ namespace API.Models.Tracking
         public string PersonnelName { get; set; }
         public string OpName { get; set; }
         public string MachineName { get; set; }
+        public string Date { get; set; }
+        public string Time { get; set; }
         public string ProductLineName { get; set; }
         public int Day { get; set; }
         public int Month { get; set; }
@@ -68,6 +71,18 @@ namespace API.Models.Tracking
             mapping.ForMember(
                 dest => dest.ProductLineName,
                 config => config.MapFrom(src => $"{src.Machine.OperationStation.ProductLine.Name} ")
+            );
+            mapping.ForMember(
+                dest => dest.MachineName,
+                config => config.MapFrom(src => $"{src.Machine.Name} ")
+            );
+            mapping.ForMember(
+                dest => dest.Date,
+                config => config.MapFrom(src => $"{src.EnterTime.ToPerDateTimeString("yyyy/MM/dd")} ")
+            );
+            mapping.ForMember(
+                dest => dest.Time,
+                config => config.MapFrom(src => $"{src.EnterTime:HH:mm:ss} ")
             );
         }
 
