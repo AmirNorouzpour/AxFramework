@@ -125,7 +125,7 @@ namespace API.Controllers.v1.Chart
                 {
                     if (chart.Id == 17)
                     {
-                        var pid = 2;
+                        var pid = 5;
                         var data = _productInstanceRepository.GetAll(x => !x.ExitTime.HasValue && x.Machine.OperationStation.ProductLineId == pid).Include(x => x.Machine.OperationStation).ToList().GroupBy(x => x.Machine.OperationStationId)
                              .Select(x => new { Count = x.Count(), x.Key, Data = x })
                              .ToList();

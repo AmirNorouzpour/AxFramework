@@ -173,6 +173,8 @@
         ProductInstanceHistoryInsert,
         [AxDisplay("حذف", "02", ProductInstanceHistoryList)]
         ProductInstanceHistoryDelete,
+        [AxDisplay("ارزیابی عملکرد", "03", ProductInstanceHistoryList)]
+        ProductInstanceHistoryAnalysis,
         //=====================
         [AxDisplay("لیست ضایعات", "03", TrackingInfo)]
         DamagedList,

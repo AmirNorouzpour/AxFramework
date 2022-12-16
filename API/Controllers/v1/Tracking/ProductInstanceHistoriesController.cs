@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Models;
 using API.Models.Tracking;
 using AutoMapper.QueryableExtensions;
 using Common;
@@ -9,6 +11,7 @@ using Data.Repositories;
 using Entities.Framework.Reports;
 using Entities.Tracking;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
 using WebFramework.Filters;
 
@@ -58,7 +61,7 @@ namespace API.Controllers.v1.Tracking
         }
 
         [HttpGet("ExportToXlsx")]
-        [AxAuthorize(StateType = StateType.Ignore, AxOp = AxOp.ProductInstanceHistoryList)]
+        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.ProductInstanceHistoryList)]
         public Task<FileContentResult> ExportToXlsx(string code = null, long? op = null, string userIds = null, DateTime? date1 = null, DateTime? date2 = null)
         {
             var data0 = _repository.GetAll();
@@ -92,6 +95,57 @@ namespace API.Controllers.v1.Tracking
                 FileDownloadName = fileName
             });
 
+        }
+
+        [HttpGet("Chart")]
+        [AxAuthorize(StateType = StateType.OnlyToken, AxOp = AxOp.ProductInstanceHistoryAnalysis,ShowInMenu = true,Order = 5)]
+        public BarChartDto Chart(long? machineId = null, int? userId = null, DateTime? date1 = null, DateTime? date2 = null, long? pid = null)
+        {
+            var barChart = new BarChartDto { Series = new List<AxSeriesDto>() };
+            var data0 = _repository.GetAll();
+            if (date1.HasValue)
+                data0 = data0.Where(x => x.EnterTime >= date1);
+            if (date2.HasValue)
+                data0 = data0.Where(x => x.EnterTime <= date2);
+
+            if (pid.HasValue)
+            {
+                var data = data0.Where(x => x.Machine.OperationStation.ProductLineId == pid)
+                     .ToList().GroupBy(x => x.EnterTime.Date)
+                     .Select(x => new { Count = x.Count(), x.Key, Data = x })
+                     .ToList();
+                var count = data.Select(x => x.Count)
+                    .ToList();
+                barChart.Series.Add(new AxSeriesDto { Data = count, Name = "گزارش تولید" });
+                barChart.Labels = data.Select(x => x.Key.ToPerDateTimeString("yyyy/MM/dd")).ToList();
+                return barChart;
+            }
+            if (userId.HasValue)
+            {
+                var data = data0.Where(x => x.UserId == userId)
+                      .ToList().GroupBy(x => x.EnterTime.Date)
+                      .Select(x => new { Count = x.Count(), x.Key, Data = x })
+                      .ToList();
+                var count = data.Select(x => x.Count)
+                    .ToList();
+                barChart.Series.Add(new AxSeriesDto { Data = count, Name = "گزارش تولید" });
+                barChart.Labels = data.Select(x => x.Key.ToPerDateTimeString("yyyy/MM/dd")).ToList();
+                return barChart;
+            }
+            if (machineId.HasValue)
+            {
+                var data = data0.Where(x => x.MachineId == machineId)
+                   .ToList().GroupBy(x => x.EnterTime.Date)
+                   .Select(x => new { Count = x.Count(), x.Key, Data = x })
+                   .ToList();
+                var count = data.Select(x => x.Count)
+                    .ToList();
+                barChart.Series.Add(new AxSeriesDto { Data = count, Name = "گزارش تولید" });
+                barChart.Labels = data.Select(x => x.Key.ToPerDateTimeString("yyyy/MM/dd")).ToList();
+                return barChart;
+            }
+
+            return new BarChartDto();
         }
     }
 }
