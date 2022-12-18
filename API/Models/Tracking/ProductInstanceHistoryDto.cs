@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Common.Utilities;
 using Entities.Tracking;
@@ -33,6 +31,7 @@ namespace API.Models.Tracking
         public DateTime EnterTime { get; set; }
         public DateTime? ExitTime { get; set; }
         public string Code { get; set; }
+        public string ShiftDate { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -83,6 +82,10 @@ namespace API.Models.Tracking
             mapping.ForMember(
                 dest => dest.Time,
                 config => config.MapFrom(src => $"{src.EnterTime:HH:mm:ss} ")
+            );
+            mapping.ForMember(
+                dest => dest.ShiftDate,
+                config => config.MapFrom(src => src.EnterTime.Hour < 7 ? src.EnterTime.AddDays(-1).ToPerDateString("yyyy/MM/dd") + "-" + src.Shift.Name : src.EnterTime.ToPerDateString("yyyy/MM/dd") + "-" + src.Shift.Name)
             );
         }
 

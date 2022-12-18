@@ -98,7 +98,7 @@ namespace API.Controllers.v1.Tracking
         }
 
         [HttpGet("Chart")]
-        [AxAuthorize(StateType = StateType.OnlyToken, AxOp = AxOp.ProductInstanceHistoryAnalysis,ShowInMenu = true,Order = 5)]
+        [AxAuthorize(StateType = StateType.Ignore, AxOp = AxOp.ProductInstanceHistoryAnalysis,ShowInMenu = true,Order = 5)]
         public BarChartDto Chart(long? machineId = null, int? userId = null, DateTime? date1 = null, DateTime? date2 = null, long? pid = null)
         {
             var barChart = new BarChartDto { Series = new List<AxSeriesDto>() };
@@ -122,14 +122,14 @@ namespace API.Controllers.v1.Tracking
             }
             if (userId.HasValue)
             {
-                var data = data0.Where(x => x.UserId == userId)
-                      .ToList().GroupBy(x => x.EnterTime.Date)
+                var data = data0.Where(x => x.UserId == userId).ProjectTo<ProductInstanceHistoryDto>()
+                      .ToList().GroupBy(x => x.ShiftDate)
                       .Select(x => new { Count = x.Count(), x.Key, Data = x })
                       .ToList();
                 var count = data.Select(x => x.Count)
                     .ToList();
                 barChart.Series.Add(new AxSeriesDto { Data = count, Name = "گزارش تولید" });
-                barChart.Labels = data.Select(x => x.Key.ToPerDateTimeString("yyyy/MM/dd")).ToList();
+                barChart.Labels = data.Select(x => x.Key).ToList();
                 return barChart;
             }
             if (machineId.HasValue)
