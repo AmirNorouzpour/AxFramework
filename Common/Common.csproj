@@ -1,25 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="DynamicExpresso.Core" Version="2.3.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.2" />
-    <PackageReference Include="Pluralize.NET.Core" Version="1.0.0" />
-    <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="DynamicExpresso.Core" Version="2.3.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.2" />
+		<PackageReference Include="Pluralize.NET.Core" Version="1.0.0" />
+		<PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ExpressionBuilder\ExpressionBuilder.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\ExpressionBuilder\ExpressionBuilder.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="EPPlus">
-      <HintPath>..\WebFramework\bin\Debug\netcoreapp3.1\EPPlus.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+	<ItemGroup>
+		<Reference Include="EPPlus">
+			<HintPath>..\WebFramework\bin\Debug\netcoreapp3.1\EPPlus.dll</HintPath>
+		</Reference>
+	</ItemGroup>
 
 </Project>
