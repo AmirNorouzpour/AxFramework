@@ -53,7 +53,7 @@ namespace Data
         public int SaveChanges(AuditType type)
         {
             var result = 0;
-            CreateAuditLog(type);
+            //CreateAuditLog(type);
             try
             {
                 result = base.SaveChanges();
@@ -72,7 +72,7 @@ namespace Data
 
         public Task<int> SaveChangesAsync(AuditType type, CancellationToken cancellationToken)
         {
-            CreateAuditLog(type);
+            //CreateAuditLog(type);
             var result = base.SaveChangesAsync(cancellationToken);
             return result;
         }
