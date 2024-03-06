@@ -54,10 +54,10 @@ namespace Services.Services
             return new AccessToken(securityToken);
         }
 
-        private async Task<IEnumerable<Claim>> _getClaimsAsync(User user, string clientId)
+        private static Task<IEnumerable<Claim>> _getClaimsAsync(User user, string clientId)
         {
             if (user == null)
-                return null;
+                return Task.FromResult<IEnumerable<Claim>>(null);
 
             //var result = await signInManager.ClaimsFactory.CreateAsync(user);
             var list = new List<Claim>
@@ -67,7 +67,7 @@ namespace Services.Services
                 new Claim(ClaimTypes.UserData, clientId),
             };
 
-            return list;
+            return Task.FromResult<IEnumerable<Claim>>(list);
         }
     }
 }
