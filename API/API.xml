@@ -4,29 +4,12 @@
         <name>API</name>
     </assembly>
     <members>
-        <member name="T:API.Controllers.v1.Basic.GroupsController">
-            <summary>
-            Group Methods
-            </summary>
-        </member>
-        <member name="T:API.Controllers.v1.Basic.MenusController">
-            <summary>
-            Fetch Menus or Systems for user 
-            </summary>
-        </member>
-        <member name="M:API.Controllers.v1.Basic.MenusController.GetSystemMenus(System.Int32)">
-            <summary>
-            Get Systems And Menus for Signed User
-            </summary>
-            <param name="systemId"></param>
-            <returns></returns>
-        </member>
         <member name="T:API.Controllers.v1.Basic.UsersController">
             <summary>
             Users Actions
             </summary>
         </member>
-        <member name="M:API.Controllers.v1.Basic.UsersController.#ctor(Data.Repositories.UserRepositories.IUserRepository,Services.Services.Services.IJwtService,Microsoft.Extensions.Caching.Memory.IMemoryCache,Data.Repositories.IBaseRepository{Entities.Framework.LoginLog},Data.Repositories.IBaseRepository{Entities.Framework.Permission},Data.Repositories.IBaseRepository{Entities.Framework.UserToken},Data.Repositories.IBaseRepository{Entities.Framework.Menu},Data.Repositories.IBaseRepository{Entities.Framework.ConfigData},Data.Repositories.IBaseRepository{Entities.Framework.UserGroup},Data.Repositories.IBaseRepository{Entities.Framework.FileAttachment},Data.Repositories.IBaseRepository{Entities.Framework.UserMessage},Services.Services.IUserConnectionService,Data.Repositories.IBaseRepository{Entities.Framework.UserConnection},Data.Repositories.IBaseRepository{Entities.Framework.AxCharts.AxChart},Data.Repositories.IBaseRepository{Entities.Framework.AxCharts.BarChart},Data.Repositories.IBaseRepository{Entities.Framework.AxCharts.NumericWidget},Microsoft.AspNetCore.SignalR.IHubContext{API.Hubs.AxHub},Data.Repositories.IBaseRepository{Entities.Framework.AxGroup})">
+        <member name="M:API.Controllers.v1.Basic.UsersController.#ctor(Services.Services.Services.IJwtService,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.AspNetCore.SignalR.IHubContext{API.Hubs.AxHub},Data.ApplicationDbContext)">
             <inheritdoc />
         </member>
         <member name="M:API.Controllers.v1.Basic.UsersController.AxToken(API.Models.LoginDto,System.Threading.CancellationToken)">
@@ -58,12 +41,6 @@
             Get Signed User Permission keys
             </summary>
             <param name="cancellationToken"></param>
-            <returns></returns>
-        </member>
-        <member name="M:API.Controllers.v1.Basic.UsersController.Get(Entities.Framework.Reports.DataRequest2)">
-            <summary>
-            Get All Users
-            </summary>
             <returns></returns>
         </member>
         <member name="M:API.Controllers.v1.Basic.UsersController.Get(System.Int32)">

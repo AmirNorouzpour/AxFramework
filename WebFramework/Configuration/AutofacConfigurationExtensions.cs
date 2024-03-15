@@ -15,24 +15,24 @@ namespace WebFramework.Configuration
     {
         public static void AddServices(this ContainerBuilder containerBuilder)
         {
-            containerBuilder.RegisterGeneric(typeof(BaseRepository<>)).As(typeof(IBaseRepository<>)).InstancePerLifetimeScope();
+            //containerBuilder.RegisterGeneric(typeof(BaseRepository<>)).As(typeof(IBaseRepository<>)).InstancePerLifetimeScope();
 
             var commonAssembly = typeof(SiteSettings).Assembly;
             var entitiesAssembly = typeof(IEntity).Assembly;
-            var dataAssembly = typeof(DataContext).Assembly;
+            //var dataAssembly = typeof(DataContext).Assembly;
             var servicesAssembly = typeof(JwtService).Assembly;
 
-            containerBuilder.RegisterAssemblyTypes(commonAssembly, entitiesAssembly, dataAssembly, servicesAssembly)
+            containerBuilder.RegisterAssemblyTypes(commonAssembly, entitiesAssembly, servicesAssembly)
                 .AssignableTo<IScopedDependency>()
                 .AsImplementedInterfaces()
                 .InstancePerLifetimeScope();
 
-            containerBuilder.RegisterAssemblyTypes(commonAssembly, entitiesAssembly, dataAssembly, servicesAssembly)
+            containerBuilder.RegisterAssemblyTypes(commonAssembly, entitiesAssembly, servicesAssembly)
                 .AssignableTo<ITransientDependency>()
                 .AsImplementedInterfaces()
                 .InstancePerDependency();
 
-            containerBuilder.RegisterAssemblyTypes(commonAssembly, entitiesAssembly, dataAssembly, servicesAssembly)
+            containerBuilder.RegisterAssemblyTypes(commonAssembly, entitiesAssembly, servicesAssembly)
                 .AssignableTo<ISingletonDependency>()
                 .AsImplementedInterfaces()
                 .SingleInstance();

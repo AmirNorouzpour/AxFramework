@@ -43,29 +43,29 @@ namespace WebFramework.Filters
 
             if (StateType == StateType.Authorized)
             {
-                var keys = memoryCache.GetOrCreate("user" + userId, entry =>
-                {
-                    var permissionRepository = filterContext.HttpContext.RequestServices.GetRequiredService<IBaseRepository<Permission>>();
-                    var userGroupRepository = filterContext.HttpContext.RequestServices.GetRequiredService<IBaseRepository<UserGroup>>();
-                    var data = PermissionHelper.GetKeysFromDb(permissionRepository, userGroupRepository, userId);
-                    return data;
-                }).ToList();
-                var axKey = AxOp.GetAxKey();
-                var haveAccess = keys.Any(x => x.ToLower() == axKey);
+                //var keys = memoryCache.GetOrCreate("user" + userId, entry =>
+                //{
+                //    var permissionRepository = filterContext.HttpContext.RequestServices.GetRequiredService<IBaseRepository<Permission>>();
+                //    var userGroupRepository = filterContext.HttpContext.RequestServices.GetRequiredService<IBaseRepository<UserGroup>>();
+                //    var data = PermissionHelper.GetKeysFromDb(permissionRepository, userGroupRepository, userId);
+                //    return data;
+                //}).ToList();
+                //var axKey = AxOp.GetAxKey();
+                //var haveAccess = keys.Any(x => x.ToLower() == axKey);
 
-                if (!haveAccess)
-                {
-                    if (StateType == StateType.CheckParent)
-                    {
-                        var haveAccessToParent = keys.Any(key => key == ParentAxOp.GetAxKey());
-                        if (!haveAccessToParent)
-                        {
-                            throw new AppException(ApiResultStatusCode.UnAuthorized, "شما دسترسی برای عملیات درخواست شده را ندارید", HttpStatusCode.Unauthorized);
-                        }
-                    }
-                    else
-                        throw new AppException(ApiResultStatusCode.UnAuthorized, "شما دسترسی برای عملیات درخواست شده را ندارید", HttpStatusCode.Unauthorized);
-                }
+                //if (!haveAccess)
+                //{
+                //    if (StateType == StateType.CheckParent)
+                //    {
+                //        var haveAccessToParent = keys.Any(key => key == ParentAxOp.GetAxKey());
+                //        if (!haveAccessToParent)
+                //        {
+                //            throw new AppException(ApiResultStatusCode.UnAuthorized, "شما دسترسی برای عملیات درخواست شده را ندارید", HttpStatusCode.Unauthorized);
+                //        }
+                //    }
+                //    else
+                //        throw new AppException(ApiResultStatusCode.UnAuthorized, "شما دسترسی برای عملیات درخواست شده را ندارید", HttpStatusCode.Unauthorized);
+                //}
             }
         }
     }

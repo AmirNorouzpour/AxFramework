@@ -6,6 +6,7 @@ using FluentValidation;
 
 namespace Entities.Framework
 {
+    [Table("Basic_Users")]
     public class User : BaseEntity
     {
         [Required]

@@ -3,7 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Common;
 using Common.Utilities;
-using Data.Repositories;
+using Dapper;
+using Data;
 using Entities.Framework;
 using Microsoft.AspNetCore.Mvc;
 using WebFramework.Api;
@@ -14,11 +15,11 @@ namespace API.Controllers.v1.Basic
     [ApiVersion("1")]
     public class GeneralController : BaseController
     {
-        private readonly IBaseRepository<ConfigData> _repository;
+        private readonly ApplicationDbContext _applicationDbContext;
 
-        public GeneralController(IBaseRepository<ConfigData> repository)
+        public GeneralController(ApplicationDbContext applicationDbContext)
         {
-            _repository = repository;
+            _applicationDbContext = applicationDbContext;
         }
 
 
@@ -26,12 +27,13 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.Ignore)]
         public async Task<IActionResult> GetOrganizationLogo(CancellationToken cancellationToken)
         {
-            var data = await _repository.GetFirstAsync(x => x.Active, cancellationToken);
+            var dc = _applicationDbContext.CreateConnection();
+            var dataDto = await dc.QueryFirstOrDefaultAsync<ConfigData>("select * from ConfigData where Active = 1");
 
-            if (data == null)
+            if (dataDto == null)
                 return NotFound();
 
-            return File(data.OrganizationLogo.ToArray(), GeneralUtils.GetContentType("a.png"));
+            return File(dataDto.OrganizationLogo.ToArray(), GeneralUtils.GetContentType("a.png"));
         }
     }
 }

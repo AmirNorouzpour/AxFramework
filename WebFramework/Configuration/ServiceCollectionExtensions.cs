@@ -7,13 +7,9 @@ using Common;
 using Common.Exception;
 using Common.Utilities;
 using Data;
-using Data.Repositories;
-using Data.Repositories.UserRepositories;
 using Entities.Framework;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 namespace WebFramework.Configuration
@@ -23,13 +19,7 @@ namespace WebFramework.Configuration
 
         public static void AddDbContext(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<DataContext>(options =>
-            {
-                options.UseSqlServer(configuration.GetConnectionString("SqlServer"), builder =>
-                {
-                    builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-                }).ConfigureWarnings(warning => warning.Throw(RelationalEventId.QueryPossibleUnintendedUseOfEqualsWarning));
-            });
+            services.AddSingleton<ApplicationDbContext>();
         }
 
         //public static void AddMinimalMvc(this IServiceCollection services)
@@ -101,23 +91,23 @@ namespace WebFramework.Configuration
                     },
                     OnTokenValidated = async context =>
                     {
-                        var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
-                        var userTokenRepository = context.HttpContext.RequestServices.GetRequiredService<IBaseRepository<UserToken>>();
+                        //var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+                        //var userTokenRepository = context.HttpContext.RequestServices.GetRequiredService<IBaseRepository<UserToken>>();
 
-                        var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
-                        if (claimsIdentity != null && claimsIdentity.Claims?.Any() != true)
-                            context.Fail("This token has no claims.");
+                        //var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+                        //if (claimsIdentity != null && claimsIdentity.Claims?.Any() != true)
+                        //    context.Fail("This token has no claims.");
 
-                        var clientId = claimsIdentity.GetClientId();
-                        var userToken = await userTokenRepository.GetAll(x => x.ClientId == clientId).Include(x => x.User)
-                            .Select(x => new UserToken { User = new User { IsActive = x.User.IsActive } })
-                            .FirstOrDefaultAsync(context.HttpContext.RequestAborted);
+                        //var clientId = claimsIdentity.GetClientId();
+                        //var userToken = await userTokenRepository.GetAll(x => x.ClientId == clientId).Include(x => x.User)
+                        //    .Select(x => new UserToken { User = new User { IsActive = x.User.IsActive } })
+                        //    .FirstOrDefaultAsync(context.HttpContext.RequestAborted);
 
-                        if (userToken == null)
-                            throw new AppException(ApiResultStatusCode.UnAuthenticated, "عدم احراز هویت", HttpStatusCode.Unauthorized);
+                        //if (userToken == null)
+                        //    throw new AppException(ApiResultStatusCode.UnAuthenticated, "عدم احراز هویت", HttpStatusCode.Unauthorized);
 
-                        if (!userToken.User.IsActive)
-                            context.Fail("کاربری شما غیرفعال شده است");
+                        //if (!userToken.User.IsActive)
+                        //    context.Fail("کاربری شما غیرفعال شده است");
 
                         //await userRepository.UpdateLastLoginDateAsync(userToken.User, context.HttpContext.RequestAborted);
                     }

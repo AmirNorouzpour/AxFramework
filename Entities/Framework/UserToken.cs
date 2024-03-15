@@ -1,9 +1,10 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
+using Dapper.Contrib.Extensions;
 using FluentValidation;
 
 namespace Entities.Framework
 {
+    [Table("UserTokens")]
     public class UserToken : BaseEntity
     {
         public string Token { get; set; }
@@ -14,8 +15,6 @@ namespace Entities.Framework
         public string UserAgent { get; set; }
         public string ClientId { get; set; }
         public int UserId { get; set; }
-        [ForeignKey("UserId")]
-        public User User { get; set; }
         public DateTime ExpireDateTime { get; set; }
     }
     public class UserTokenValidator : AbstractValidator<UserToken> { }

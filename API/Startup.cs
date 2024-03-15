@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 using Services.Services;
 using WebFramework.Configuration;
@@ -44,7 +43,7 @@ namespace API
             services.AddDbContext(Configuration);
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
-                builder.WithOrigins("http://localhost:4200").WithMethods("GET","POST","DELETE","PUT")
+                builder.WithOrigins("http://localhost:4200").WithMethods("GET", "POST", "DELETE", "PUT")
                     .AllowAnyMethod().WithExposedHeaders("X-Pagination")
                     .AllowAnyHeader().AllowCredentials();
             }));
@@ -60,8 +59,8 @@ namespace API
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
-            services.AddHostedService<TimedAuditLogHostedService>();
-            services.AddHostedService<TimedHardwareHostedService>();
+            //services.AddHostedService<TimedAuditLogHostedService>();
+            //services.AddHostedService<TimedHardwareHostedService>();
             services.AddSwagger();
             services.AddSignalR();
             services.Configure<ApiBehaviorOptions>(options =>
@@ -93,22 +92,8 @@ namespace API
                 endpoints.MapHub<AxHub>("/AxHub");
             });
 
-            //using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
-            //{
-            //    var context = serviceScope.ServiceProvider.GetRequiredService<DataContext>();
-            //    context.Database.Migrate();
-            //}
-            var configurationVariable = Configuration.GetConnectionString("SqlServer");
-            ConnSingleton.Instance.Value = configurationVariable;
-            ConnSingleton.Instance.Name = "SqlServer";
+            AutofacContainer = app.ApplicationServices.GetAutofacRoot();
 
-
-
-            this.AutofacContainer = app.ApplicationServices.GetAutofacRoot();
-
-            var assembly = Assembly.GetAssembly(typeof(Startup));
-            app.UseAutomaticMenus(assembly);
-            app.UseSetStaticVariables();
             AutoFacSingleton.Instance = AutofacContainer;
         }
 

@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
 using Entities.Framework;
-using Microsoft.EntityFrameworkCore.Internal;
 using WebFramework.Api;
 using ValidationContext = System.ComponentModel.DataAnnotations.ValidationContext;
 using System.Linq;
