@@ -43,7 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AxIndicators\AxIndicators.csproj" />
     <ProjectReference Include="..\WebFramework\WebFramework.csproj" />
   </ItemGroup>
 
@@ -60,6 +59,10 @@
     <Content Update="nlog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">

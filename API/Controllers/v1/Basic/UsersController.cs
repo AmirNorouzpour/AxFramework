@@ -116,7 +116,7 @@ namespace API.Controllers.v1.Basic
             #endregion
 
             if (user == null)
-                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthenticated, null, "Username or Password is incorrect!");
+                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthenticated, null, "نام کاربری و یا رمز عبور اشتباه است!");
 
             var clientId = Guid.NewGuid().ToString();
             var token = await _jwtService.GenerateAsync(user, clientId);
@@ -193,7 +193,7 @@ namespace API.Controllers.v1.Basic
         public async Task<ApiResult<UserInfo>> GetInitData(CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetFirstAsync(x => x.Id == UserId, cancellationToken);
-            _userRepository.LoadReference(user, t => t.UserSettings);
+            await _userRepository.LoadReferenceAsync(user, t => t.UserSettings, cancellationToken);
 
 
             if (user == null)
@@ -446,16 +446,19 @@ namespace API.Controllers.v1.Basic
             return resultDto;
         }
 
-        //[HttpGet("[action]")]
-        //[AxAuthorize(StateType = StateType.Ignore)]
-        //public virtual ApiResult<IEnumerable<UserGroupDto>> GetUsersAndGroups([FromQuery] DataRequest request)
-        //{
-        //    filter ??= "";
-        //    var users = _userRepository.GetAll(x => x.IsActive && x.UserName.Contains(filter) || x.FirstName.Contains(filter) || x.FirstName.Contains(filter)).ToList().Select(x => new UserGroupDto { Id = x.Id, Type = UgType.User, Name = x.FullName, GroupLabel = "کاربر" });
-        //    var groups = _groupRepository.GetAll(x => x.GroupName.Contains(filter)).ToList().Select(x => new UserGroupDto { Id = x.Id, Type = UgType.Group, Name = x.GroupName, GroupLabel = "گروه کاربر" });
-        //    var result = users.Union(groups);
-        //    return Ok(result);
-        //}
+        [HttpGet("[action]")]
+        [AxAuthorize(StateType = StateType.Ignore)]
+        public virtual ApiResult<IEnumerable<UserGroupDto>> GetUsersAndGroups([FromQuery] DataRequest request)
+        {
+            var filter = request.Filters.FirstOrDefault()?.Value1;
+            filter ??= "";
+            var users = _userRepository.GetAll(x => x.IsActive && x.UserName.Contains(filter) || x.FirstName.Contains(filter) || x.FirstName.Contains(filter)).ToList().Select(x => new UserGroupDto { Id = x.Id, Type = UgType.User, Name = x.FullName, GroupLabel = "کاربر" });
+            var groups = _groupRepository.GetAll(x => x.GroupName.Contains(filter)).ToList().Select(x => new UserGroupDto { Id = x.Id, Type = UgType.Group, Name = x.GroupName, GroupLabel = "گروه کاربر" });
+            var result = users.Union(groups);
+            return Ok(result);
+        }
+
+
 
 
     }

@@ -24,10 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AxIndicators\AxIndicators.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="EPPlus">
       <HintPath>..\..\AxTarder\AxTrader\bin\x64\Debug\EPPlus.dll</HintPath>
     </Reference>

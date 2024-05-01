@@ -24,15 +24,13 @@ namespace API.Controllers.v1.Basic
         private readonly IMemoryCache _memoryCache;
         private readonly IBaseRepository<Permission> _permissionRepository;
         private readonly IBaseRepository<UserGroup> _userGroupRepository;
-        private readonly IBaseRepository<UserChart> _userChartsRepository;
 
-        public MenusController(IBaseRepository<Menu> repository, IMemoryCache memoryCache, IBaseRepository<Permission> permissionRepository, IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<UserChart> userChartsRepository)
+        public MenusController(IBaseRepository<Menu> repository, IMemoryCache memoryCache, IBaseRepository<Permission> permissionRepository, IBaseRepository<UserGroup> userGroupRepository)
         {
             _repository = repository;
             _memoryCache = memoryCache;
             _permissionRepository = permissionRepository;
             _userGroupRepository = userGroupRepository;
-            _userChartsRepository = userChartsRepository;
         }
 
         /// <summary>
@@ -77,22 +75,11 @@ namespace API.Controllers.v1.Basic
             return Ok(output);
         }
 
-        //[HttpGet("[action]/{systemId}")]
-        //[AxAuthorize(StateType = StateType.OnlyToken)]
-        //public virtual ApiResult<dynamic> GetDashboardCharts(int systemId)
-        //{
-        //    var charts = _userChartsRepository.GetAll(x => x.UserId == UserId && x.Active && x.AxChart.Active && x.AxChart.SystemId == systemId).Include(x => x.AxChart).OrderBy(x => x.OrderIndex).Select(x => new
-        //    {
-        //        x.AxChart.Title,
-        //        x.AxChart.ReportId,
-        //        x.AxChart.ChartType,
-        //        x.Width,
-        //        x.Height,
-        //        x.OrderIndex,
-        //        x.AxChart.Id,
-        //        x.AxChart.IsLive
-        //    });
-        //    return Ok(charts);
-        //}
+        [HttpGet("[action]/{systemId}")]
+        [AxAuthorize(StateType = StateType.OnlyToken)]
+        public virtual ApiResult<dynamic> GetDashboardCharts(int systemId)
+        {
+            return Ok(new List<string>());
+        }
     }
 }

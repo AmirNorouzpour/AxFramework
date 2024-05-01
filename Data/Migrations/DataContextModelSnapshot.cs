@@ -22,108 +22,6 @@ namespace Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("Entities.Framework.AnalysisRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("CreatorUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DateFrom")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateTo")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("InsertDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ModifiedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifierUserId")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int?>("StrategyId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TimeFrames")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StrategyId");
-
-                    b.ToTable("AnalysisRequests");
-                });
-
-            modelBuilder.Entity("Entities.Framework.AnalysisResult", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("AnalysisRequestId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CreatorUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("InsertDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ModifiedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifierUserId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("NetProfit")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("decimal(18,8)");
-
-                    b.Property<decimal>("NetProfitPercentage")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("SymbolId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TimeFrame")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalTrades")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("WinRate")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AnalysisRequestId");
-
-                    b.HasIndex("SymbolId");
-
-                    b.ToTable("AnalysisResults");
-                });
-
             modelBuilder.Entity("Entities.Framework.Audit", b =>
                 {
                     b.Property<int>("Id")
@@ -734,65 +632,6 @@ namespace Data.Migrations
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("Entities.Framework.Payment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("decimal(18,8)");
-
-                    b.Property<string>("Coin")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CreatorUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Currency")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DurationDays")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("InsertDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ModifiedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifierUserId")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubscriptionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TransactionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SubscriptionId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Payments");
-                });
-
             modelBuilder.Entity("Entities.Framework.Permission", b =>
                 {
                     b.Property<int>("Id")
@@ -839,165 +678,6 @@ namespace Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Permissions");
-                });
-
-            modelBuilder.Entity("Entities.Framework.Strategy", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("BaseCurrency")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Commission")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("decimal(18,8)");
-
-                    b.Property<int>("CreatorUserId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("InitialCapital")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("decimal(18,8)");
-
-                    b.Property<DateTime>("InsertDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ModifiedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifierUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("OrderSize")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("decimal(18,8)");
-
-                    b.Property<int>("OrderSizeType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Pyramiding")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Strategies");
-                });
-
-            modelBuilder.Entity("Entities.Framework.Subscription", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("CreatorUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Discount")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("decimal(18,8)");
-
-                    b.Property<DateTime>("InsertDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ModifiedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifierUserId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("MonthPrice")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("decimal(18,8)");
-
-                    b.Property<decimal>("OneYearPrice")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("decimal(18,8)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<decimal>("ThreeMonthPrice")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("decimal(18,8)");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Subscriptions");
-                });
-
-            modelBuilder.Entity("Entities.Framework.Symbol", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int?>("AnalysisRequestId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CreatorUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Decimals")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("InsertDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Logo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("LotSize")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ModifiedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifierUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<string>("Ticker")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AnalysisRequestId");
-
-                    b.ToTable("Symbols");
                 });
 
             modelBuilder.Entity("Entities.Framework.User", b =>
@@ -1052,9 +732,6 @@ namespace Data.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
-                    b.Property<int?>("SubscriptionId")
-                        .HasColumnType("int");
-
                     b.Property<string>("UniqueKey")
                         .HasColumnType("nvarchar(max)");
 
@@ -1064,56 +741,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SubscriptionId");
-
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("Entities.Framework.UserChart", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<bool>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("CreatorUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Height")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("InsertDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ModifiedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifierUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrderIndex")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Width")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserCharts");
                 });
 
             modelBuilder.Entity("Entities.Framework.UserConnection", b =>
@@ -1344,53 +972,6 @@ namespace Data.Migrations
                     b.ToTable("UserSettings");
                 });
 
-            modelBuilder.Entity("Entities.Framework.UserStrategy", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("CreatorUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Data")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("InsertDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ModifiedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifierUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<string>("Unique")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserStrategies");
-                });
-
             modelBuilder.Entity("Entities.Framework.UserToken", b =>
                 {
                     b.Property<int>("Id")
@@ -1448,34 +1029,6 @@ namespace Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserTokens");
-                });
-
-            modelBuilder.Entity("Entities.Framework.AnalysisRequest", b =>
-                {
-                    b.HasOne("Entities.Framework.Strategy", "Strategy")
-                        .WithMany()
-                        .HasForeignKey("StrategyId");
-
-                    b.Navigation("Strategy");
-                });
-
-            modelBuilder.Entity("Entities.Framework.AnalysisResult", b =>
-                {
-                    b.HasOne("Entities.Framework.AnalysisRequest", "AnalysisRequest")
-                        .WithMany()
-                        .HasForeignKey("AnalysisRequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Entities.Framework.Symbol", "Symbol")
-                        .WithMany()
-                        .HasForeignKey("SymbolId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AnalysisRequest");
-
-                    b.Navigation("Symbol");
                 });
 
             modelBuilder.Entity("Entities.Framework.Audit", b =>
@@ -1542,25 +1095,6 @@ namespace Data.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("Entities.Framework.Payment", b =>
-                {
-                    b.HasOne("Entities.Framework.Subscription", "Subscription")
-                        .WithMany()
-                        .HasForeignKey("SubscriptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Entities.Framework.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Subscription");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Entities.Framework.Permission", b =>
                 {
                     b.HasOne("Entities.Framework.AxGroup", "User")
@@ -1580,33 +1114,6 @@ namespace Data.Migrations
                     b.Navigation("Group");
 
                     b.Navigation("Menu");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Entities.Framework.Symbol", b =>
-                {
-                    b.HasOne("Entities.Framework.AnalysisRequest", null)
-                        .WithMany("SymbolList")
-                        .HasForeignKey("AnalysisRequestId");
-                });
-
-            modelBuilder.Entity("Entities.Framework.User", b =>
-                {
-                    b.HasOne("Entities.Framework.Subscription", "Subscription")
-                        .WithMany()
-                        .HasForeignKey("SubscriptionId");
-
-                    b.Navigation("Subscription");
-                });
-
-            modelBuilder.Entity("Entities.Framework.UserChart", b =>
-                {
-                    b.HasOne("Entities.Framework.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -1680,17 +1187,6 @@ namespace Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Entities.Framework.UserStrategy", b =>
-                {
-                    b.HasOne("Entities.Framework.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Entities.Framework.UserToken", b =>
                 {
                     b.HasOne("Entities.Framework.User", "User")
@@ -1700,11 +1196,6 @@ namespace Data.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Entities.Framework.AnalysisRequest", b =>
-                {
-                    b.Navigation("SymbolList");
                 });
 
             modelBuilder.Entity("Entities.Framework.AxGroup", b =>

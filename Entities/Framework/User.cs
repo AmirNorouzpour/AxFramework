@@ -16,9 +16,6 @@ namespace Entities.Framework
         public string UniqueKey { get; set; }
         public string FireBaseToken { get; set; }
         public string Email { get; set; }
-        [ForeignKey("SubscriptionId")]
-        public int? SubscriptionId { get; set; }
-        public  Subscription Subscription { get; set; }
         public LoginType LoginType { get; set; }
         public DateTime? ExpireDateTime { get; set; }
         public DateTime LastLoginDate { get; set; }
