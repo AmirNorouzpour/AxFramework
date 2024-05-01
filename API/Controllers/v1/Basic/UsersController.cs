@@ -86,7 +86,7 @@ namespace API.Controllers.v1.Basic
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [AxAuthorize(StateType = StateType.Ignore)]
-        [HttpPost("[action]")]
+        [HttpPost("Login")]
         public async Task<ApiResult<AccessToken>> AxToken(LoginDto loginDto, CancellationToken cancellationToken)
         {
             var passwordHash = SecurityHelper.GetSha256Hash(loginDto.Password);
