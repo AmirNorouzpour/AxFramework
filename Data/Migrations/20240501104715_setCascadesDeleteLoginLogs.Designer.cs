@@ -4,6 +4,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240501104715_setCascadesDeleteLoginLogs")]
+    partial class setCascadesDeleteLoginLogs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1101,7 +1104,7 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Entities.Framework.Permission", b =>
                 {
-                    b.HasOne("Entities.Framework.AxGroup", "Group")
+                    b.HasOne("Entities.Framework.AxGroup", "User")
                         .WithMany()
                         .HasForeignKey("GroupId");
 
@@ -1111,10 +1114,9 @@ namespace Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Entities.Framework.User", "User")
-                        .WithMany("Permissions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                    b.HasOne("Entities.Framework.User", "Group")
+                        .WithMany()
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Group");
 
@@ -1221,8 +1223,6 @@ namespace Data.Migrations
             modelBuilder.Entity("Entities.Framework.User", b =>
                 {
                     b.Navigation("LoginLogs");
-
-                    b.Navigation("Permissions");
 
                     b.Navigation("UserSettings");
                 });

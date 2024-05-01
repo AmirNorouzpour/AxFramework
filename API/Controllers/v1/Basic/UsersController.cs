@@ -45,6 +45,7 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<UserGroup> _userGroupRepository;
         private readonly IBaseRepository<FileAttachment> _fileRepository;
         private readonly IBaseRepository<UserMessage> _userMessageRepository;
+        private readonly IBaseRepository<UserMessageReceiver> _userMessageReceiverRepository;
         private readonly IUserConnectionService _userConnectionService;
         private readonly IBaseRepository<UserConnection> _userConnectionRepository;
         private readonly IHubContext<AxHub> _hub;
@@ -56,7 +57,7 @@ namespace API.Controllers.v1.Basic
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
             IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileRepository, IBaseRepository<UserMessage> userMessageRepository,
             IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository,
-            IHubContext<AxHub> hub, IBaseRepository<AxGroup> groupRepository, IBaseRepository<Permission> permissionRepository)
+            IHubContext<AxHub> hub, IBaseRepository<AxGroup> groupRepository, IBaseRepository<Permission> permissionRepository, IBaseRepository<UserMessageReceiver> userMessageReceiverRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -73,6 +74,7 @@ namespace API.Controllers.v1.Basic
             _hub = hub;
             _groupRepository = groupRepository;
             _permissionRepository = permissionRepository;
+            _userMessageReceiverRepository = userMessageReceiverRepository;
         }
 
         /// <summary>
@@ -178,6 +180,9 @@ namespace API.Controllers.v1.Basic
             if (userToken == null)
                 throw new UnauthorizedAccessException("کاربر یافت نشد");
 
+            var uc = await _userConnectionRepository.GetFirstAsync(x => x.UserTokenId == userToken.Id, cancellationToken);
+            if (uc != null)
+                await _userConnectionRepository.DeleteAsync(uc, cancellationToken);
             await _userTokenRepository.DeleteAsync(userToken, cancellationToken);
             return Ok();
         }
@@ -319,7 +324,7 @@ namespace API.Controllers.v1.Basic
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [AxAuthorize(StateType = StateType.OnlyToken, Order = 0, AxOp = AxOp.UserList, ShowInMenu = true)]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 0, AxOp = AxOp.UserList, ShowInMenu = true)]
         public ApiResult<IQueryable<UserSelectDto>> Get([FromQuery] DataRequest request)
         {
             var user = _userRepository.GetFirst(x => x.Id == UserId);
@@ -419,13 +424,37 @@ namespace API.Controllers.v1.Basic
         {
             dto.Password = SecurityHelper.GetSha256Hash(dto.Password);
             await _userRepository.AddAsync(dto.ToEntity(), cancellationToken);
-            var resultDto = await _userRepository.TableNoTracking.ProjectTo<UserDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
+            var resultDto = await _userRepository.TableNoTracking.ProjectTo<UserDto>().SingleOrDefaultAsync(p => p.UserName.Equals(dto.UserName), cancellationToken);
+            if (resultDto?.Id > 0)
+            {
+                var um = new UserMessage
+                {
+                    Body = $"کاربر گرامی {dto.FirstName} {dto.LastName} به سامانه خوش آمدید ",
+                    SenderId = 2,
+                    CreatorUserId = 2,
+                    InsertDateTime = DateTime.Now,
+                    Confidentiality = UserMessageConfidentiality.Normal,
+                    Number = "1000",
+                    Title = "خوش آمد گویی"
+                };
+                await _userMessageRepository.AddAsync(um, cancellationToken);
+
+                var umr = new UserMessageReceiver
+                {
+                    Title = dto.FirstName + " " + dto.LastName,
+                    CreatorUserId = dto.Id,
+                    PrimaryKey = dto.Id,
+                    UserMessageId = um.Id,
+                    InsertDateTime = DateTime.Now
+                };
+
+                await _userMessageReceiverRepository.AddAsync(umr, cancellationToken);
+            }
             return resultDto;
         }
 
         [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.UserDelete, Order = 4)]
         [HttpDelete("{id}")]
-        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.UserDelete)]
         public virtual async Task<ApiResult> Delete(int id, CancellationToken cancellationToken)
         {
             var model = await _userRepository.GetFirstAsync(x => x.Id.Equals(id), cancellationToken);

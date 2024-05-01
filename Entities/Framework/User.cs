@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using FluentValidation;
@@ -22,6 +24,8 @@ namespace Entities.Framework
         public UserSetting UserSettings { get; set; }
         [NotMapped]
         public string FullName => FirstName + " " + LastName;
+        public virtual ICollection<LoginLog> LoginLogs { get; set; }
+        public virtual ICollection<Permission> Permissions { get; set; }
     }
 
     public enum LoginType

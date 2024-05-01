@@ -8,6 +8,7 @@ using Common.Utilities;
 using Entities.Framework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Identity.Client;
 
 namespace Data
 {
@@ -26,7 +27,35 @@ namespace Data
             modelBuilder.RegisterAllEntities<IEntity>(entitiesAssembly);
             modelBuilder.AddSequentialGuidForIdConvention();
             modelBuilder.AddPluralizingTableNameConvention();
+
+
+            modelBuilder.Entity<User>()
+                .HasMany<LoginLog>(c => c.LoginLogs)
+                .WithOne(s => s.User)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<User>()
+                .HasMany<Permission>(c => c.Permissions)
+                .WithOne(s => s.User)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<User>()
+                .HasOne<UserSetting>(c => c.UserSettings)
+                .WithOne(s => s.User)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+
+            //var eTypes = modelBuilder.Model.GetEntityTypes();
+            //foreach (var type in eTypes)
+            //{
+            //    var foreignKeys = type.GetForeignKeys();
+            //    foreach (var foreignKey in foreignKeys)
+            //    {
+            //        foreignKey.DeleteBehavior = DeleteBehavior.Cascade;
+            //    }
+            //}
         }
+
 
         public int SaveChanges(AuditType type)
         {

@@ -9,6 +9,7 @@ namespace Entities.Framework
         public string Title { get; set; }
         public string Body { get; set; }
         public string Number { get; set; }
+        public string Number2 { get; set; }
         public bool HaveAttachment { get; set; }
         public int SenderId { get; set; }
         [ForeignKey("SenderId")]
