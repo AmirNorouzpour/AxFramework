@@ -3,7 +3,6 @@ using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using Common;
 using Common.Exception;
 using Common.Utilities;
@@ -29,7 +28,7 @@ namespace WebFramework.Configuration
                 options.UseSqlServer(configuration.GetConnectionString("SqlServer"), builder =>
                 {
                     builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-                }).ConfigureWarnings(warning => warning.Throw(RelationalEventId.QueryClientEvaluationWarning));
+                }).ConfigureWarnings(warning => warning.Throw(RelationalEventId.QueryPossibleUnintendedUseOfEqualsWarning));
             });
         }
 
@@ -88,12 +87,7 @@ namespace WebFramework.Configuration
                 options.TokenValidationParameters = validationParameters;
                 options.Events = new JwtBearerEvents
                 {
-                    OnAuthenticationFailed = context =>
-                    {
-                        if (context.Exception != null)
-                            throw new AppException(ApiResultStatusCode.UnAuthenticated, "عدم احراز هویت", HttpStatusCode.Unauthorized, context.Exception);
-                        return Task.CompletedTask;
-                    },
+                    OnAuthenticationFailed = context => throw new AppException(ApiResultStatusCode.UnAuthenticated, "عدم احراز هویت", HttpStatusCode.Unauthorized, context.Exception),
                     OnChallenge = context =>
                     {
                         //var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(JwtBearerEvents));

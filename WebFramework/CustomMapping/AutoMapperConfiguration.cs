@@ -12,6 +12,7 @@ namespace WebFramework.CustomMapping
             Mapper.Initialize(config =>
             {
                 config.AddCustomMappingProfile();
+                //config.Internal().MethodMappingEnabled = false;
             });
 
             Mapper.Configuration.CompileMappings();
