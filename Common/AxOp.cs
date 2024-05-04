@@ -86,6 +86,12 @@
         GeoInfoUpdate,
         [AxDisplay("حذف", "03", GeoInfo)]
         GeoInfoDelete,
+        [AxDisplay("قرارداد ها", "07", UserManagement)]
+        Contracts,
+        [AxDisplay("قرارداد", "01", Contracts)]
+        ContractsItem,
+        [AxDisplay("ایمپورت قرارداد ها", "02", Contracts)]
+        ContractsImport,
 
 
         //==================================================================================

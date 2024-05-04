@@ -1,4 +1,6 @@
-﻿namespace API.Models
+﻿using System;
+
+namespace API.Models
 {
     public class UserGroupDto
     {
@@ -6,6 +8,7 @@
         public int Id { get; set; }
         public string GroupLabel { get; set; }
         public UgType Type { get; set; }
+        public DateTime InsertDateTime { get; set; }
     }
 
     public enum UgType

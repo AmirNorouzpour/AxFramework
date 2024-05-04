@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using AutoMapper;
 using Entities.Framework;
 using WebFramework.Api;
 
@@ -19,6 +20,12 @@ namespace API.Models
                 config => config.MapFrom(src => src.GroupUsers.Count)
             );
         }
+    }
+
+    public class AxGroupUsersDto : BaseDto<AxGroupUsersDto, UserGroup, int>
+    {
+        public List<int> UserIds { get; set; }
+        public int GroupId { get; set; }
     }
 
 }
