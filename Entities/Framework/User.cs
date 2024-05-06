@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Dapper.Contrib.Extensions;
 using FluentValidation;
 
 namespace Entities.Framework
 {
-    [Table("Basic_Users")]
+    [System.ComponentModel.DataAnnotations.Schema.Table("Users")]
     public class User : BaseEntity
     {
         [Required]
@@ -20,9 +20,9 @@ namespace Entities.Framework
         public DateTime? ExpireDateTime { get; set; }
         public bool OutOfOrgAccess { get; set; }
         public DateTimeOffset? LastLoginDate { get; set; }
+        [Computed]
         public ICollection<Address> Addresses { get; set; }
-        public UserSetting UserSettings { get; set; }
-        [NotMapped]
+        [Computed]
         public string FullName => FirstName + " " + LastName;
     }
 

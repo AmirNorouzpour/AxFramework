@@ -1,6 +1,8 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Data;
 
@@ -15,8 +17,7 @@ public class ApplicationDbContext
 
     public IDbConnection CreateConnection()
     {
-        var connection = _configuration.GetConnectionString(_configuration.GetConnectionString("SqlServer"));
-
+        var connection = _configuration.GetConnectionString("SqlServer") ?? throw new InvalidOperationException("ConnectionString is Null");
         return new SqlConnection(connection);
 
     }

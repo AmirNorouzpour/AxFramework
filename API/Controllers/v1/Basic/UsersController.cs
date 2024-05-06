@@ -63,7 +63,7 @@ namespace API.Controllers.v1.Basic
         {
             var dc = _dbConnection.CreateConnection();
             var passwordHash = SecurityHelper.GetSha256Hash(loginDto.Password);
-            var user = await dc.QueryFirstOrDefaultAsync<User>("select Id, LastLoginDate from Users where username = @username and password = @passwordHash", new { username = loginDto.Username, passwordHash });
+            var user = await dc.QueryFirstOrDefaultAsync<User>("select * from Users where username = @username and password = @passwordHash", new { username = loginDto.Username, passwordHash });
 
             var address = Request.HttpContext.Connection.RemoteIpAddress;
             var computerName = address.GetDeviceName();
@@ -121,11 +121,7 @@ namespace API.Controllers.v1.Basic
             };
 
             //Response.Cookies.Append("AxToken", token.access_token);
-
-            await Task.Run(() =>
-            {
-                dc.ExecuteAsync("delete from UserTokens where ExpireDateTime < getdate()");
-            }, cancellationToken);
+            await dc.ExecuteAsync("delete from UserTokens where ExpireDateTime < getdate()");
 
             await dc.InsertAsync(userToken);
 
