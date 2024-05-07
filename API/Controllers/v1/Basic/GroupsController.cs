@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
 using WebFramework.Filters;
-using Common.Utilities;
 
 namespace API.Controllers.v1.Basic
 {
@@ -44,7 +43,7 @@ namespace API.Controllers.v1.Basic
         }
 
         [HttpGet]
-        [AxAuthorize(StateType = StateType.Ignore, Order = 1, AxOp = AxOp.GroupItem)]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.GroupItem)]
         [Route("[action]/{id}")]
         public async Task<ApiResult<List<UserGroupDto>>> GetGroupUsers(int id, CancellationToken cancellationToken)
         {
@@ -65,7 +64,7 @@ namespace API.Controllers.v1.Basic
         }
 
         [HttpGet]
-        [AxAuthorize(StateType = StateType.Ignore, Order = 1, AxOp = AxOp.GroupItem)]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.GroupItem)]
         [Route("{id}")]
         public async Task<ApiResult<AxGroupDto>> Get(int id, CancellationToken cancellationToken)
         {

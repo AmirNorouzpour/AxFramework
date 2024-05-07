@@ -1,4 +1,5 @@
-﻿using Entities.Contracts;
+﻿using System;
+using Entities.Contracts;
 using WebFramework.Api;
 
 namespace API.Models
@@ -10,6 +11,7 @@ namespace API.Models
         public string F3 { get; set; }
         public string F4 { get; set; }
         public string F5 { get; set; }
+        public DateTime InsertDateTime { get; set; }
 
     }
 }

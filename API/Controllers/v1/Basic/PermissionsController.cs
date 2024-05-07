@@ -65,12 +65,33 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.Authorized, ShowInMenu = false, AxOp = AxOp.PermissionTreeSave, Order = 0)]
         public ApiResult<dynamic> SavePermissions(UgType ugType, int id, List<Menu> data)
         {
+            if (ugType == UgType.User)
+            {
+                SetPermissions(id, data, true);
+            }
+            else
+            {
+                var users = _userGroupRepository.GetAll(x => x.GroupId == id);
+                foreach (var item in users)
+                {
+                    SetPermissions(item.UserId, data, false);
+                }
+            }
+
+            return Ok();
+        }
+
+        private void SetPermissions(int id, List<Menu> data, bool deleteOld)
+        {
             var user = _userRepository.GetById(id);
             var userSetting = _userSettingRepository.GetFirst(x => x.UserId == id);
             if (user != null && data.Count > 0)
             {
-                var userOldPermissions = _repository.GetAll(x => x.UserId == id);
-                _repository.DeleteRange(userOldPermissions);
+                if (deleteOld)
+                {
+                    var userOldPermissions = _repository.GetAll(x => x.UserId == id);
+                    _repository.DeleteRange(userOldPermissions);
+                }
 
                 foreach (var m in data)
                 {
@@ -111,7 +132,6 @@ namespace API.Controllers.v1.Basic
                     });
                 }
             }
-            return Ok();
         }
 
         public static IEnumerable<Menu> Traverse(Menu root)

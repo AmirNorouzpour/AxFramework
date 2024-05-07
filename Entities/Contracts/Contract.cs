@@ -1,4 +1,5 @@
 ﻿using Entities.Framework;
+using FluentValidation;
 
 namespace Entities.Contracts
 {
@@ -11,4 +12,7 @@ namespace Entities.Contracts
         public string F5 { get; set; }
     }
 
+
+
+    public class ContractValidator : AbstractValidator<Contract> { }
 }

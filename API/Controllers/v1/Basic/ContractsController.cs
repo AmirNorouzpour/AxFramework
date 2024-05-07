@@ -21,7 +21,7 @@ namespace API.Controllers.v1.Basic
         }
 
         [HttpGet]
-        [AxAuthorize(StateType = StateType.Authorized, Order = 0, AxOp = AxOp.UserList, ShowInMenu = true)]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 0, AxOp = AxOp.ContractsList, ShowInMenu = true)]
         public ApiResult<IQueryable<ContractsDto>> Get([FromQuery] DataRequest request)
         {
             var data = _repository.GetAll().Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<ContractsDto>();
